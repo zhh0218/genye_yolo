@@ -128,8 +128,15 @@ def norm01(x: np.ndarray) -> np.ndarray:
     return np.clip((x - lo) / (hi - lo), 0.0, 1.0)
 
 
-def save_case_figure(out_path: Path, rgb: np.ndarray, depth: np.ndarray, ll_up: np.ndarray, hf_up: np.ndarray,
-                     mask: np.ndarray, boundary: np.ndarray) -> None:
+def save_case_figure(
+    out_path: Path,
+    rgb: np.ndarray,
+    depth: np.ndarray,
+    ll_up: np.ndarray,
+    hf_up: np.ndarray,
+    mask: np.ndarray,
+    boundary: np.ndarray,
+) -> None:
     overlay = rgb.copy()
     overlay[boundary] = np.array([255, 30, 30], dtype=np.uint8)
     fig, axes = plt.subplots(2, 3, figsize=(13, 8), constrained_layout=True)
@@ -161,8 +168,7 @@ def save_architecture_figure(out_path: Path) -> None:
         ax.text(x + w / 2, y + h / 2, text, ha="center", va="center", fontsize=11)
 
     def arrow(x1, y1, x2, y2):
-        ax.annotate("", xy=(x2, y2), xytext=(x1, y1),
-                    arrowprops=dict(arrowstyle="->", lw=1.6, color="#263238"))
+        ax.annotate("", xy=(x2, y2), xytext=(x1, y1), arrowprops={"arrowstyle": "->", "lw": 1.6, "color": "#263238"})
 
     box(0.4, 2.45, 1.7, 0.8, "Depth P3", "#f1f8e9")
     box(2.65, 2.45, 1.7, 0.8, "Haar split", "#e3f2fd")
@@ -187,8 +193,15 @@ def save_architecture_figure(out_path: Path) -> None:
     arrow(10.35, 3.55, 10.35, 2.3)
     arrow(10.35, 1.55, 10.35, 1.0)
 
-    ax.text(6.0, 5.65, "S8 P3 wavelet-guided CoordAttV2: LL carries stable geometry, HF supplies edge gate",
-            ha="center", va="center", fontsize=14, weight="bold")
+    ax.text(
+        6.0,
+        5.65,
+        "S8 P3 wavelet-guided CoordAttV2: LL carries stable geometry, HF supplies edge gate",
+        ha="center",
+        va="center",
+        fontsize=14,
+        weight="bold",
+    )
     fig.savefig(out_path, dpi=180, bbox_inches="tight")
     plt.close(fig)
 
@@ -261,7 +274,7 @@ def main() -> None:
         writer.writeheader()
         writer.writerows(rows)
 
-    numeric_keys = [k for k in rows[0].keys() if k != "image"]
+    numeric_keys = [k for k in rows[0] if k != "image"]
     summary = {k: summarize([float(r[k]) for r in rows]) for k in numeric_keys}
     summary["n_samples"] = len(rows)
     summary_path = args.out / "summary.json"
@@ -296,15 +309,15 @@ def main() -> None:
 
 | 指标 | Mean | Median | 说明 |
 |---|---:|---:|---|
-| LL-depth Pearson r | {summary['ll_depth_corr']['mean']:.4f} | {summary['ll_depth_corr']['median']:.4f} | LL 与原始 depth 的结构一致性。 |
-| LL-depth PSNR | {summary['ll_depth_psnr']['mean']:.2f} dB | {summary['ll_depth_psnr']['median']:.2f} dB | LL 作为平滑重构的保真度。 |
-| LL energy share | {summary['ll_energy_share']['mean']:.4f} | {summary['ll_energy_share']['median']:.4f} | Haar 系数中低频承载的能量比例。 |
-| HF-boundary AUC | {summary['hf_boundary_auc']['mean']:.4f} | {summary['hf_boundary_auc']['median']:.4f} | 高频幅值对 GT mask 边界的区分度。 |
-| LL-gradient boundary AUC | {summary['ll_grad_boundary_auc']['mean']:.4f} | {summary['ll_grad_boundary_auc']['median']:.4f} | LL 平滑后仍保留的边界梯度信号。 |
+| LL-depth Pearson r | {summary["ll_depth_corr"]["mean"]:.4f} | {summary["ll_depth_corr"]["median"]:.4f} | LL 与原始 depth 的结构一致性。 |
+| LL-depth PSNR | {summary["ll_depth_psnr"]["mean"]:.2f} dB | {summary["ll_depth_psnr"]["median"]:.2f} dB | LL 作为平滑重构的保真度。 |
+| LL energy share | {summary["ll_energy_share"]["mean"]:.4f} | {summary["ll_energy_share"]["median"]:.4f} | Haar 系数中低频承载的能量比例。 |
+| HF-boundary AUC | {summary["hf_boundary_auc"]["mean"]:.4f} | {summary["hf_boundary_auc"]["median"]:.4f} | 高频幅值对 GT mask 边界的区分度。 |
+| LL-gradient boundary AUC | {summary["ll_grad_boundary_auc"]["mean"]:.4f} | {summary["ll_grad_boundary_auc"]["median"]:.4f} | LL 平滑后仍保留的边界梯度信号。 |
 
 ## 结论
 
-当前 S8 的设计是合理的：`LL -> depth_low -> CoordAttV2` 给融合模块提供稳定的深度几何/主体结构；`LH/HL/HH -> edge_gate` 则把突变、边缘和局部细节留给单独的乘性增强分支。实验数据支持这种分工：LL 与原 depth 的相关均值为 `{summary['ll_depth_corr']['mean']:.4f}`，低频能量占比为 `{summary['ll_energy_share']['mean']:.4f}`，说明 LL 不是丢掉 depth，而是在保留主体结构的同时去掉细碎高频。
+当前 S8 的设计是合理的：`LL -> depth_low -> CoordAttV2` 给融合模块提供稳定的深度几何/主体结构；`LH/HL/HH -> edge_gate` 则把突变、边缘和局部细节留给单独的乘性增强分支。实验数据支持这种分工：LL 与原 depth 的相关均值为 `{summary["ll_depth_corr"]["mean"]:.4f}`，低频能量占比为 `{summary["ll_energy_share"]["mean"]:.4f}`，说明 LL 不是丢掉 depth，而是在保留主体结构的同时去掉细碎高频。
 
 因此，若问题是“LL 作为 CoordAttV2 的 depth 输入是否合适”，答案是：合适，尤其适合 CoordAtt 这种依赖全局/坐标方向池化的融合模块，因为它更稳定、更像几何先验；高频部分直接进入 CoordAtt 反而可能把噪声和无关深度突变混入主融合路径。
 

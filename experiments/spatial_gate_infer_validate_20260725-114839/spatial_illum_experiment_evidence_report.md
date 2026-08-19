@@ -31,15 +31,15 @@ Dataset/create_xinjiang_realistic_exposure_aug_dataset.py
 
 关键代码依据如下：
 
-| 依据 | 文件行号 | 说明 |
-| --- | --- | --- |
-| `InstanceCandidate` 结构体中有 `selected: bool` 字段 | `Dataset/create_xinjiang_realistic_exposure_aug_dataset.py:25-32` | 每个实例候选都会记录是否 selected |
-| `selected = is_light_candidate(...) and rng.random() <= args.candidate_prob` | `Dataset/create_xinjiang_realistic_exposure_aug_dataset.py:210-234` | selected 是由亮色候选条件和随机采样概率共同决定 |
-| selected 过多时只保留 light_score 最高的前几个 | `Dataset/create_xinjiang_realistic_exposure_aug_dataset.py:237-240` | 进一步说明 selected 表示“最终保留用于增强的实例” |
-| manifest 写入 `selected: int(c.selected)` | `Dataset/create_xinjiang_realistic_exposure_aug_dataset.py:426-440` | `candidate_instance_manifest.csv` 中的 selected 字段直接来自 `c.selected` |
-| 只对 `selected` 列表中的实例调用 `apply_realistic_exposure` | `Dataset/create_xinjiang_realistic_exposure_aug_dataset.py:451-457` | 这是最关键证据：只有 selected 实例被曝光增强 |
-| val split 的增强图写入 `val_expaug` 和 `val_ab` | `Dataset/create_xinjiang_realistic_exposure_aug_dataset.py:463-467` | `_realexp` 图像进入本实验用的 `val_ab` |
-| summary 明确写出增强范围 | `Dataset/create_xinjiang_realistic_exposure_aug_dataset.py:559-572` | `"scope": "RGB image only, selected light-color package instances"` |
+| 依据                                                                         | 文件行号                                                            | 说明                                                                      |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `InstanceCandidate` 结构体中有 `selected: bool` 字段                         | `Dataset/create_xinjiang_realistic_exposure_aug_dataset.py:25-32`   | 每个实例候选都会记录是否 selected                                         |
+| `selected = is_light_candidate(...) and rng.random() <= args.candidate_prob` | `Dataset/create_xinjiang_realistic_exposure_aug_dataset.py:210-234` | selected 是由亮色候选条件和随机采样概率共同决定                           |
+| selected 过多时只保留 light_score 最高的前几个                               | `Dataset/create_xinjiang_realistic_exposure_aug_dataset.py:237-240` | 进一步说明 selected 表示“最终保留用于增强的实例”                          |
+| manifest 写入 `selected: int(c.selected)`                                    | `Dataset/create_xinjiang_realistic_exposure_aug_dataset.py:426-440` | `candidate_instance_manifest.csv` 中的 selected 字段直接来自 `c.selected` |
+| 只对 `selected` 列表中的实例调用 `apply_realistic_exposure`                  | `Dataset/create_xinjiang_realistic_exposure_aug_dataset.py:451-457` | 这是最关键证据：只有 selected 实例被曝光增强                              |
+| val split 的增强图写入 `val_expaug` 和 `val_ab`                              | `Dataset/create_xinjiang_realistic_exposure_aug_dataset.py:463-467` | `_realexp` 图像进入本实验用的 `val_ab`                                    |
+| summary 明确写出增强范围                                                     | `Dataset/create_xinjiang_realistic_exposure_aug_dataset.py:559-572` | `"scope": "RGB image only, selected light-color package instances"`       |
 
 曝光增强函数本身在 `Dataset/create_xinjiang_realistic_exposure_aug_dataset.py:290-313`。它做的事情包括把 mask 内像素推向高亮、降低饱和度、颜色扁平化、加入 hotspot 和 halo。
 
@@ -81,13 +81,13 @@ experiments/spatial_gate_infer_validate_20260725-114839/evidence_spatial_illum/s
 
 校验结果：
 
-| 项目 | 结果 |
-| --- | ---: |
-| val 中 candidate manifest 行数 | 1040 |
-| val 中 selected=1 且有 `_realexp` 对的 stem 数 | 247 |
-| realistic exposure manifest 中 val 增强行数 | 247 |
-| label normal / `_realexp` SHA256 完全相同 | 247 / 247 |
-| depth normal / `_realexp` SHA256 完全相同 | 247 / 247 |
+| 项目                                           |      结果 |
+| ---------------------------------------------- | --------: |
+| val 中 candidate manifest 行数                 |      1040 |
+| val 中 selected=1 且有 `_realexp` 对的 stem 数 |       247 |
+| realistic exposure manifest 中 val 增强行数    |       247 |
+| label normal / `_realexp` SHA256 完全相同      | 247 / 247 |
+| depth normal / `_realexp` SHA256 完全相同      | 247 / 247 |
 
 这进一步说明：val 中每个生成 `_realexp` 的图像，都能在 selected manifest 中找到对应实例；同时 label/depth 未变化。
 
@@ -115,19 +115,19 @@ experiments/spatial_gate_infer_validate_20260725-114839/evidence_spatial_illum/
 
 补做的全量像素统计也支持这一点：
 
-| 区域 | normal vs `_realexp` 平均 RGB 绝对差分 |
-| --- | ---: |
-| selected 实例区域 | 52.06 |
-| unselected control 实例区域 | 3.26 |
-| background 区域 | 1.19 |
+| 区域                        | normal vs `_realexp` 平均 RGB 绝对差分 |
+| --------------------------- | -------------------------------------: |
+| selected 实例区域           |                                  52.06 |
+| unselected control 实例区域 |                                   3.26 |
+| background 区域             |                                   1.19 |
 
 变化比例统计：
 
-| 区域 | `RGB diff > 8` 像素比例均值 |
-| --- | ---: |
-| selected 实例区域 | 66.26% |
-| unselected control 实例区域 | 7.43% |
-| background 区域 | 2.50% |
+| 区域                        | `RGB diff > 8` 像素比例均值 |
+| --------------------------- | --------------------------: |
+| selected 实例区域           |                      66.26% |
+| unselected control 实例区域 |                       7.43% |
+| background 区域             |                       2.50% |
 
 此外：
 
@@ -261,7 +261,6 @@ Dataset/create_xinjiang_realistic_exposure_aug_dataset.py:548-552
 
 但是要注意：这里的 overexposed 是“合成过曝增强图”，不是自然采集过曝图。 -->
 
-
 ## 2. 标注 selected 实例成对分析怎么做，依据是什么
 
 脚本：
@@ -283,42 +282,42 @@ experiments/spatial_gate_infer_validate_20260725-114839/analyze_labeled_exposure
 
 代码依据：
 
-| 依据 | 文件行号 |
-| --- | --- |
-| 只读取 `split == val` 且 `selected == 1` 的实例 | `analyze_labeled_exposure_gate.py:54-60` |
-| 解析 YOLO label 为 polygon mask | `analyze_labeled_exposure_gate.py:63-80` |
-| 找 normal / `_realexp` RGB-D pair | `analyze_labeled_exposure_gate.py:205-210` |
+| 依据                                                 | 文件行号                                   |
+| ---------------------------------------------------- | ------------------------------------------ |
+| 只读取 `split == val` 且 `selected == 1` 的实例      | `analyze_labeled_exposure_gate.py:54-60`   |
+| 解析 YOLO label 为 polygon mask                      | `analyze_labeled_exposure_gate.py:63-80`   |
+| 找 normal / `_realexp` RGB-D pair                    | `analyze_labeled_exposure_gate.py:205-210` |
 | 用 selected index 生成 selected/control/package mask | `analyze_labeled_exposure_gate.py:217-230` |
-| 对 normal 和 exposed 分别抓 alpha | `analyze_labeled_exposure_gate.py:232-236` |
-| 计算 selected/control/background delta | `analyze_labeled_exposure_gate.py:238-257` |
-| summary 中明确写出该方法 | `analyze_labeled_exposure_gate.py:281-287` |
+| 对 normal 和 exposed 分别抓 alpha                    | `analyze_labeled_exposure_gate.py:232-236` |
+| 计算 selected/control/background delta               | `analyze_labeled_exposure_gate.py:238-257` |
+| summary 中明确写出该方法                             | `analyze_labeled_exposure_gate.py:281-287` |
 
 这个实验的依据很强，因为它比较的是同一个包裹 mask 在 normal 和 `_realexp` 两个版本中的 gate 变化。
 
 结果摘要：
 
-| 模块 | selected alpha 差值，exposed-normal | selected Depth 差值 | 符合 Depth 增加的比例 |
-| --- | ---: | ---: | ---: |
-| model.36 | +0.0188 | -0.0188 | 6.5% |
-| model.37 | +0.0111 | -0.0111 | 29.1% |
-| model.38 | -0.0191 | +0.0191 | 71.7% |
+| 模块     | selected alpha 差值，exposed-normal | selected Depth 差值 | 符合 Depth 增加的比例 |
+| -------- | ----------------------------------: | ------------------: | --------------------: |
+| model.36 |                             +0.0188 |             -0.0188 |                  6.5% |
+| model.37 |                             +0.0111 |             -0.0111 |                 29.1% |
+| model.38 |                             -0.0191 |             +0.0191 |                 71.7% |
 
 这说明：在真正被增强的 selected 包裹实例上，最深层 `model.38.coord_att` 符合预期；浅层和中层没有符合预期，甚至方向相反。
 
 ## 5. 每一步是否有依据
 
-| 实验步骤 | 是否有依据 | 依据 |
-| --- | --- | --- |
-| 使用 `Dataset/xinjiang_1500_baoguang` | 有 | 实验 README、脚本默认路径、输出 summary 都指向该数据集 |
-| 使用 `val_ab` | 有 | `val_ab` 是 clean val + synthetic exposure val；summary 中为 547 张 |
-| `_realexp` 表示曝光增强图 | 有 | 生成脚本默认 suffix 和 summary 均写 `_realexp` |
-| `selected=1` 表示被增强实例 | 有，且证据最强 | 生成脚本只对 selected 调用 `apply_realistic_exposure`；图片差分也集中在 selected mask |
-| label/depth 在 normal 和 `_realexp` 中相同 | 有 | 生成脚本复制；我补做 SHA256 校验为 247/247 完全一致 |
-| `alpha` 表示 RGB 权重 | 有 | 模型前向公式就是 `alpha * rgb + (1 - alpha) * depth` |
-| `1-alpha` 表示 depth 权重 | 有 | 同上 |
-| 局部高亮 mask 用 `gray > 0.88` | 有 | local 分析脚本明确这样生成 mask |
-| selected 实例 mask 来自 YOLO label polygon | 有 | labeled 分析脚本按 label polygon 填充 mask |
-| 当前实验能证明最终 mAP 提升 | 没有 | 缺少同条件有/无 `spatial_illum` 消融 |
+| 实验步骤                                   | 是否有依据     | 依据                                                                                  |
+| ------------------------------------------ | -------------- | ------------------------------------------------------------------------------------- |
+| 使用 `Dataset/xinjiang_1500_baoguang`      | 有             | 实验 README、脚本默认路径、输出 summary 都指向该数据集                                |
+| 使用 `val_ab`                              | 有             | `val_ab` 是 clean val + synthetic exposure val；summary 中为 547 张                   |
+| `_realexp` 表示曝光增强图                  | 有             | 生成脚本默认 suffix 和 summary 均写 `_realexp`                                        |
+| `selected=1` 表示被增强实例                | 有，且证据最强 | 生成脚本只对 selected 调用 `apply_realistic_exposure`；图片差分也集中在 selected mask |
+| label/depth 在 normal 和 `_realexp` 中相同 | 有             | 生成脚本复制；我补做 SHA256 校验为 247/247 完全一致                                   |
+| `alpha` 表示 RGB 权重                      | 有             | 模型前向公式就是 `alpha * rgb + (1 - alpha) * depth`                                  |
+| `1-alpha` 表示 depth 权重                  | 有             | 同上                                                                                  |
+| 局部高亮 mask 用 `gray > 0.88`             | 有             | local 分析脚本明确这样生成 mask                                                       |
+| selected 实例 mask 来自 YOLO label polygon | 有             | labeled 分析脚本按 label polygon 填充 mask                                            |
+| 当前实验能证明最终 mAP 提升                | 没有           | 缺少同条件有/无 `spatial_illum` 消融                                                  |
 
 ## 6. 最终判断
 
