@@ -22,12 +22,12 @@ Y = f(F_R', F_D')
 
 四种模式为：
 
-| 模式 | λ_R | λ_D | 含义 |
-|---|---:|---:|---|
-| RD | 1 | 1 | 正常 RGB+Depth |
-| R-only | 1 | 0 | 只保留 RGB 特征，静默 Depth 特征 |
-| D-only | 0 | 1 | 只保留 Depth 特征，静默 RGB 特征 |
-| Empty | 0 | 0 | Shapley 基线 |
+| 模式   | λ_R | λ_D | 含义                             |
+| ------ | --: | --: | -------------------------------- |
+| RD     |   1 |   1 | 正常 RGB+Depth                   |
+| R-only |   1 |   0 | 只保留 RGB 特征，静默 Depth 特征 |
+| D-only |   0 |   1 | 只保留 Depth 特征，静默 RGB 特征 |
+| Empty  |   0 |   0 | Shapley 基线                     |
 
 这里使用 feature-level mute，而不是把原始 depth 图片置零。原因是原始 0 值可能是有效/无效深度编码，且卷积、BN、bias 会让 raw zero 不等价于 feature zero。
 
@@ -35,11 +35,11 @@ Y = f(F_R', F_D')
 
 本实验主要由三个脚本完成：
 
-| 脚本 | 作用 | 关键输出 |
-|---|---|---|
-| `run_four_state_val.py` | 加载 S8 checkpoint，在内存中 hook 三个 RGB-D 融合层，依次执行 RD/R-only/D-only/Empty 四态验证，并计算 Shapley 贡献 | `four_state_metrics.json`、`four_state_metrics.csv`、`shapley_metrics.csv`、四态柱状图、Shapley 堆叠图 |
-| `plot_training_curves.py` | 读取原始 S8 训练目录中的 `results.csv`，绘制训练过程中的 mAP 与 loss 曲线 | `s8_training_map_curves.png`、`s8_training_loss_curves.png`、`training_curve_summary.json` |
-| `build_report.py` | 读取上述 JSON/CSV 结果，自动生成本报告 | `REPORT.md` |
+| 脚本                      | 作用                                                                                                               | 关键输出                                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `run_four_state_val.py`   | 加载 S8 checkpoint，在内存中 hook 三个 RGB-D 融合层，依次执行 RD/R-only/D-only/Empty 四态验证，并计算 Shapley 贡献 | `four_state_metrics.json`、`four_state_metrics.csv`、`shapley_metrics.csv`、四态柱状图、Shapley 堆叠图 |
+| `plot_training_curves.py` | 读取原始 S8 训练目录中的 `results.csv`，绘制训练过程中的 mAP 与 loss 曲线                                          | `s8_training_map_curves.png`、`s8_training_loss_curves.png`、`training_curve_summary.json`             |
+| `build_report.py`         | 读取上述 JSON/CSV 结果，自动生成本报告                                                                             | `REPORT.md`                                                                                            |
 
 `run_four_state_val.py` 没有改项目源码，而是对已经加载到内存里的模型做临时 monkey patch。具体步骤如下：
 
@@ -71,19 +71,19 @@ learnable_blend = False
 
 权重：`D:\Graduate\project\genye\YOLOv11-RGB-D-coord_attv2-genye\coord_attv2-s8\weights\best.pt`；数据：`D:\Graduate\project\genye\experiments\s8_modality_diagnostic_20260818\data_3cls_local.yaml`；imgsz=640，batch=8，device=0，workers=0，conf=0.001，iou=0.7；feature-level mute 插入在融合层索引 `[36, 37, 38]`。
 
-| 参数 | 值 | 说明 |
-|---|---:|---|
-| weights | `D:\Graduate\project\genye\YOLOv11-RGB-D-coord_attv2-genye\coord_attv2-s8\weights\best.pt` | S8 `best.pt` checkpoint |
-| data | `D:\Graduate\project\genye\experiments\s8_modality_diagnostic_20260818\data_3cls_local.yaml` | 本次四态验证使用的数据配置 |
-| split | `val` | 只在验证集上诊断，不训练 |
-| imgsz | `640` | 与原始训练保持 640 输入尺寸 |
-| batch | `8` | RTX 5060 Laptop GPU 上稳定运行 |
-| device | `0` | 使用本机 CUDA GPU |
-| workers | `0` | Windows 下设为 0，避免多进程 dataloader 问题 |
-| conf | `0.001` | Ultralytics val 默认低置信度阈值，用于 mAP 统计 |
-| iou | `0.7` | NMS IoU 阈值 |
-| feature mute layers | `[36, 37, 38]` | P3/P4/P5 三个 RGB-D 融合入口 |
-| λ_R/λ_D | `RD=(1,1), R-only=(1,0), D-only=(0,1), Empty=(0,0)` | Shapley 四态输入开关 |
+| 参数                |                                                                                           值 | 说明                                            |
+| ------------------- | -------------------------------------------------------------------------------------------: | ----------------------------------------------- |
+| weights             |   `D:\Graduate\project\genye\YOLOv11-RGB-D-coord_attv2-genye\coord_attv2-s8\weights\best.pt` | S8 `best.pt` checkpoint                         |
+| data                | `D:\Graduate\project\genye\experiments\s8_modality_diagnostic_20260818\data_3cls_local.yaml` | 本次四态验证使用的数据配置                      |
+| split               |                                                                                        `val` | 只在验证集上诊断，不训练                        |
+| imgsz               |                                                                                        `640` | 与原始训练保持 640 输入尺寸                     |
+| batch               |                                                                                          `8` | RTX 5060 Laptop GPU 上稳定运行                  |
+| device              |                                                                                          `0` | 使用本机 CUDA GPU                               |
+| workers             |                                                                                          `0` | Windows 下设为 0，避免多进程 dataloader 问题    |
+| conf                |                                                                                      `0.001` | Ultralytics val 默认低置信度阈值，用于 mAP 统计 |
+| iou                 |                                                                                        `0.7` | NMS IoU 阈值                                    |
+| feature mute layers |                                                                               `[36, 37, 38]` | P3/P4/P5 三个 RGB-D 融合入口                    |
+| λ_R/λ_D             |                                          `RD=(1,1), R-only=(1,0), D-only=(0,1), Empty=(0,0)` | Shapley 四态输入开关                            |
 
 原始训练配置来自 `coord_attv2-s8/args.yaml`：epochs=300，imgsz=640，batch=36，optimizer=MuSGD，lr0=0.01，lrf=0.001，momentum=0.937，weight_decay=0.0001，mosaic=1.0，fliplr=0.5，close_mosaic=10，overlap_mask=True。
 
@@ -164,23 +164,23 @@ I_RD = 0.313685 - 0.233229 - 0.075745 + 0 = 0.004711
 
 ### 6.2 四态验证结果
 
-| 模式 | λ_R | λ_D | Box mAP50-95 | Mask mAP50-95 | Box mAP50 | Mask mAP50 |
-|---|---:|---:|---:|---:|---:|---:|
-| RD | 1.0 | 1.0 | 0.3266 | 0.3137 | 0.3911 | 0.3905 |
-| R-only | 1.0 | 0.0 | 0.2398 | 0.2332 | 0.2997 | 0.2999 |
-| D-only | 0.0 | 1.0 | 0.1288 | 0.0757 | 0.2809 | 0.1610 |
-| Empty | 0.0 | 0.0 | 0.0000 | 0.0000 | 0.0000 | 0.0000 |
+| 模式   | λ_R | λ_D | Box mAP50-95 | Mask mAP50-95 | Box mAP50 | Mask mAP50 |
+| ------ | --: | --: | -----------: | ------------: | --------: | ---------: |
+| RD     | 1.0 | 1.0 |       0.3266 |        0.3137 |    0.3911 |     0.3905 |
+| R-only | 1.0 | 0.0 |       0.2398 |        0.2332 |    0.2997 |     0.2999 |
+| D-only | 0.0 | 1.0 |       0.1288 |        0.0757 |    0.2809 |     0.1610 |
+| Empty  | 0.0 | 0.0 |       0.0000 |        0.0000 |    0.0000 |     0.0000 |
 
 ![Four-state mAP bars](outputs/four_state_map_bars.png)
 
 ### 6.3 Shapley 贡献结果
 
-| 指标 | RGB Shapley | Depth Shapley | RGB 占比 | Depth 占比 | 交互项 I_RD |
-|---|---:|---:|---:|---:|---:|
-| Box mAP50-95 | 0.2188 | 0.1078 | 66.99% | 33.01% | -0.0420 |
-| Box mAP50 | 0.2050 | 0.1861 | 52.41% | 47.59% | -0.1895 |
-| Mask mAP50-95 | 0.2356 | 0.0781 | 75.10% | 24.90% | 0.0047 |
-| Mask mAP50 | 0.2647 | 0.1258 | 67.78% | 32.22% | -0.0704 |
+| 指标          | RGB Shapley | Depth Shapley | RGB 占比 | Depth 占比 | 交互项 I_RD |
+| ------------- | ----------: | ------------: | -------: | ---------: | ----------: |
+| Box mAP50-95  |      0.2188 |        0.1078 |   66.99% |     33.01% |     -0.0420 |
+| Box mAP50     |      0.2050 |        0.1861 |   52.41% |     47.59% |     -0.1895 |
+| Mask mAP50-95 |      0.2356 |        0.0781 |   75.10% |     24.90% |      0.0047 |
+| Mask mAP50    |      0.2647 |        0.1258 |   67.78% |     32.22% |     -0.0704 |
 
 ![Shapley contribution](outputs/shapley_contribution_stacked.png)
 

@@ -60,10 +60,10 @@ YOLO11-seg + RGB-D 双分支 + CoordAttV2 融合 + P3 wavelet 引导 + Depth FPN
 **[S8 已实现]** `ultralytics/cfg/models/11/yolo11-seg.yaml:7-25`：
 
 ```yaml
-scale: 's'
+scale: "s"
 end2end: False
 reg_max: 1
-rgbd_fusion: 'coord_att_v2'
+rgbd_fusion: "coord_att_v2"
 p3_wavelet_guided: True
 p3_wavelet_HF: False
 p3_wavelet_adaptive: False
@@ -117,9 +117,7 @@ for m in self.model:
     x = m(x)
 
 if self.depth_fpn:
-    p3d, p4d, p5d = depth_fpn_module(
-        _depth_save_map[4], _depth_save_map[6], _depth_save_map[10]
-    )
+    p3d, p4d, p5d = depth_fpn_module(_depth_save_map[4], _depth_save_map[6], _depth_save_map[10])
 
 _fusion_keys = [4, 6, 10]
 for fi, key in enumerate(_fusion_keys):
@@ -135,10 +133,10 @@ for fi, key in enumerate(_fusion_keys):
 **[S8 已实现]** `ultralytics/nn/tasks.py:2938-2986`：
 
 ```python
-_fusion_key = d.get('rgbd_fusion', 'se')
+_fusion_key = d.get("rgbd_fusion", "se")
 _fusion_cls = _RGBD_FUSION_CLS.get(_fusion_key, RGBDCrossAttention)
-_p3_wavelet_guided = bool(d.get('p3_wavelet_guided', False))
-_p4_wavelet_guided = bool(d.get('p4_wavelet_guided', False))
+_p3_wavelet_guided = bool(d.get("p3_wavelet_guided", False))
+_p4_wavelet_guided = bool(d.get("p4_wavelet_guided", False))
 
 _wavelet_guided_cls = _WAVELET_GUIDED_MAP.get(_fusion_key)
 _p4_fusion_cls = _wavelet_guided_cls if _p4_wavelet_guided and _wavelet_guided_cls else _fusion_cls
@@ -151,12 +149,14 @@ _p5_module = _fusion_cls(ch_p5, num_heads=8, kv_pool=10, **_fusion_kw)
 
 结合 YAML 的 `p3_wavelet_guided=True`、`p4_wavelet_guided=False`，可以确定：
 
-| 尺度 | S8 实际模块 | 代码依据 |
-|---|---|---|
-| P3 / stride 8 | `RGBDWaveletGuidedCoordAttV2` | `tasks.py:2973-2984` |
-| P4 / stride 16 | `RGBDCoordAttV2` | `tasks.py:2974,2982,2985` |
-| P5 / stride 32 | `RGBDCoordAttV2` | `tasks.py:2983,2986` |
+| 尺度           | S8 实际模块                   | 代码依据                  |
+| -------------- | ----------------------------- | ------------------------- |
+| P3 / stride 8  | `RGBDWaveletGuidedCoordAttV2` | `tasks.py:2973-2984`      |
+| P4 / stride 16 | `RGBDCoordAttV2`              | `tasks.py:2974,2982,2985` |
+| P5 / stride 32 | `RGBDCoordAttV2`              | `tasks.py:2983,2986`      |
+
 #### P3/P4/P5 stride 与感受野通俗说明
+
 输入原图尺寸：**640×640**
 
 - P3 stride=8 → 特征图：80×80；1 个特征像素，只看原图 8×8 的一小块区域
@@ -167,6 +167,7 @@ _p5_module = _fusion_cls(ch_p5, num_heads=8, kv_pool=10, **_fusion_kw)
 > stride 越大，特征图虽然像素少，但是每一个像素管原图很大一片地方。
 
 #### 为什么特征图边长变短，反而适合检测大物体？
+
 假设图里有一个很大的包裹，占原图 200×200 像素。
 
 - 在 P3 (80×80)：这个大包裹会横跨几十个特征像素。每个 P3 像素只看到包裹的一小块边角，看不到“整个包裹长什么样”，容易被局部纹理、深度噪声、过曝干扰。网络只看到碎片，很难识别这是一整个大物体。
@@ -175,12 +176,14 @@ _p5_module = _fusion_cls(ch_p5, num_heads=8, kv_pool=10, **_fusion_kw)
 > 不是 P5“看到更多像素点”，是 P5 每一个点管的原图面积巨大，擅长捕获大目标的整体。
 
 反过来小包裹，原图只有 24×24：
+
 - P3：一个 P3 像素 8×8，小包裹会占好几个 P3 点，可以捕捉它的细节。
 - P5：P5 一个点就覆盖 32×32，小包裹直接被吞进一个像素里面，细节全部丢失，分不清有没有小物体。
 
 👉 所以小物体交给 P3。
 
 ##### YOLO 三层金字塔分工（通俗版）
+
 - **P3 stride=8（80×80）细粒度**
   每个点看很小一块原图。擅长：小包裹、边缘、纹理、深度细节；不擅长大物体全局。
 
@@ -191,9 +194,11 @@ _p5_module = _fusion_cls(ch_p5, num_heads=8, kv_pool=10, **_fusion_kw)
   每个点覆盖原图很大区域。擅长：大包裹、远距离物体、全局空间；丢失细小细节。
 
 > 概念区分
+>
 > - **分辨率**：特征图本身有多少个像素
 > - **感受野**：这个像素映射回原图能看多大地盘
-> 二者是完全不同概念，P5 不是分辨率高，而是感受野大。
+>   二者是完全不同概念，P5 不是分辨率高，而是感受野大。
+
 ### 1.4 P3 wavelet 到底做了什么
 
 **[S8 已实现]** `ultralytics/nn/tasks.py:1925-1980`：
@@ -202,9 +207,7 @@ _p5_module = _fusion_cls(ch_p5, num_heads=8, kv_pool=10, **_fusion_kw)
 ll, lh, hl, hh = self._haar_split(depth)
 depth_low = F.interpolate(self.low_proj(ll), size=target_size, mode="nearest")
 edge_feat = self.hf_refine(self.hf_reduce(torch.cat((lh, hl, hh), dim=1)))
-edge_gate = torch.sigmoid(
-    F.interpolate(self.edge_gate(edge_feat), size=target_size, mode="nearest")
-)
+edge_gate = torch.sigmoid(F.interpolate(self.edge_gate(edge_feat), size=target_size, mode="nearest"))
 base = self.coord_att(rgb, depth_low)
 return base + self.beta * base * edge_gate
 ```
@@ -330,14 +333,14 @@ else:
 
 **[S8 已实现]** 当前代码对 RGB/depth 同步执行：
 
-| 增强 | depth 证据位置 |
-|---|---|
-| Mosaic | `ultralytics/data/augment.py:636-666,705-736,777-820` |
-| MixUp | `ultralytics/data/augment.py:968-970` |
-| RandomPerspective/Affine | `ultralytics/data/augment.py:1376-1421` |
-| 上下/左右翻转 | `ultralytics/data/augment.py:1637-1656` |
-| LetterBox | `ultralytics/data/augment.py:1760-1826` |
-| 转 Tensor | `ultralytics/data/augment.py:2289-2313` |
+| 增强                     | depth 证据位置                                        |
+| ------------------------ | ----------------------------------------------------- |
+| Mosaic                   | `ultralytics/data/augment.py:636-666,705-736,777-820` |
+| MixUp                    | `ultralytics/data/augment.py:968-970`                 |
+| RandomPerspective/Affine | `ultralytics/data/augment.py:1376-1421`               |
+| 上下/左右翻转            | `ultralytics/data/augment.py:1637-1656`               |
+| LetterBox                | `ultralytics/data/augment.py:1760-1826`               |
+| 转 Tensor                | `ultralytics/data/augment.py:2289-2313`               |
 
 同步几何变换已经存在，不能再写成“RGB 与 depth 一定错位”。但代码确实使用常数 `114` 填充 depth：
 
@@ -379,8 +382,13 @@ loss[2] = self._classification_loss(pred_scores, target_scores, dtype, target_sc
 
 if fg_mask.sum():
     loss[0], loss[3] = self.bbox_loss(
-        pred_distri, pred_bboxes, anchor_points, target_bboxes / stride_tensor,
-        target_scores, target_scores_sum, fg_mask,
+        pred_distri,
+        pred_bboxes,
+        anchor_points,
+        target_bboxes / stride_tensor,
+        target_scores,
+        target_scores_sum,
+        fg_mask,
     )
     loss[1] = self.calculate_segmentation_loss(
         fg_mask, masks, target_gt_idx, target_bboxes, batch_idx, proto, pred_masks, imgsz, self.overlap
@@ -419,9 +427,7 @@ self.use_dfl = m.reg_max > 1
 
 ```python
 self.rgbd_aux_loss = _bool_value(getattr(h, "rgbd_aux_loss", y.get("rgbd_aux_loss", False)))
-self.rgbd_gate_loss = self.rgbd_aux_loss and _bool_value(
-    getattr(h, "rgbd_gate_loss", y.get("rgbd_gate_loss", True))
-)
+self.rgbd_gate_loss = self.rgbd_aux_loss and _bool_value(getattr(h, "rgbd_gate_loss", y.get("rgbd_gate_loss", True)))
 self.rgbd_depth_aux_loss = self.rgbd_aux_loss and _bool_value(
     getattr(h, "rgbd_depth_aux_loss", y.get("rgbd_depth_aux_loss", True))
 )
@@ -441,8 +447,8 @@ if not (self.rgbd_depth_aux_loss and self.rgbd_depth_aux_loss_weight > 0 and log
 模型构建同样只在开关打开时才加入 depth auxiliary head，`ultralytics/nn/tasks.py:2947-2948,2997-3001`：
 
 ```python
-_rgbd_aux_loss = bool(d.get('rgbd_aux_loss', False))
-_rgbd_depth_aux_loss = _rgbd_aux_loss and bool(d.get('rgbd_depth_aux_loss', True))
+_rgbd_aux_loss = bool(d.get("rgbd_aux_loss", False))
+_rgbd_depth_aux_loss = _rgbd_aux_loss and bool(d.get("rgbd_depth_aux_loss", True))
 
 if _rgbd_depth_aux_loss:
     layers.append(RGBDDepthAuxHead(ch_p3))
@@ -476,7 +482,7 @@ target_masks = torch.zeros((b, 1, h, w), device=device)
 xywh = targets[:, -4:] * torch.tensor([w, h, w, h], device=device)
 # xywh -> tx1, ty1, tx2, ty2
 for i in range(targets.shape[0]):
-    target_masks[int(targets[i, 0]), 0, ty1[i]:ty2[i], tx1[i]:tx2[i]] = targets[i, 1] + 1
+    target_masks[int(targets[i, 0]), 0, ty1[i] : ty2[i], tx1[i] : tx2[i]] = targets[i, 1] + 1
 target_masks = target_masks.repeat(1, 3, 1, 1)
 ```
 
@@ -501,6 +507,7 @@ class PMG(nn.Module):
             nn.Conv2d(c // 4, 1, kernel_size=1, stride=1, padding=0, bias=False),
         )
 
+
 mask_f_conv = self.pmg(self.alpha * vi_f.detach() + self.beta * ir_f.detach())
 ```
 
@@ -512,15 +519,17 @@ mask_f_conv = self.pmg(self.alpha * vi_f.detach() + self.beta * ir_f.detach())
 
 ```python
 if self.training:
-    mask = F.interpolate(x3.mean(dim=1).unsqueeze(dim=1), size=(vi_f.size(2), vi_f.size(3)), mode='bilinear',
-                         align_corners=True)
+    mask = F.interpolate(
+        x3.mean(dim=1).unsqueeze(dim=1), size=(vi_f.size(2), vi_f.size(3)), mode="bilinear", align_corners=True
+    )
     y = self.transformer(mask, ir_f, vi_f)
     return y, mask_f_conv
 else:
     mask = torch.ones(mask_f_conv.size(), device=mask_f_conv.device).half()
     if p == "real" and x3 is not None:
-        mask = F.interpolate(x3.mean(dim=1).unsqueeze(dim=1), size=(vi_f.size(2), vi_f.size(3)),
-                             mode='bilinear', align_corners=True)
+        mask = F.interpolate(
+            x3.mean(dim=1).unsqueeze(dim=1), size=(vi_f.size(2), vi_f.size(3)), mode="bilinear", align_corners=True
+        )
     elif p == "predicted":
         mask = torch.sigmoid(mask_f_conv)
     y = self.transformer(mask, ir_f, vi_f)
@@ -533,15 +542,15 @@ else:
 
 ```python
 def forward(self, x, y, z):
-    b, c, h0, w0 = x.shape
+    _b, _c, _h0, _w0 = x.shape
     x, y, z = self.avg_pool(x), self.avg_pool(y), self.avg_pool(z)
     q, k, v = self.q(y), self.k(z), self.v(z)
-    x = rearrange(x, 'b (head c) h w -> b head (h w) c', head=1)
+    x = rearrange(x, "b (head c) h w -> b head (h w) c", head=1)
     q = torch.nn.functional.normalize(q, dim=-1)
     # q = q * x
     k = torch.nn.functional.normalize(k, dim=-1)
     attn = (q @ k.transpose(-2, -1)) * self.temperature
-    out = (attn @ v)
+    out = attn @ v
 ```
 
 `x` 就是传入的 GT/预测 mask。它只被池化和 reshape；唯一把它乘到 query 的 `q = q * x` 被注释，后面的有效运算不再读取 `x`。因此，**按 COFNet 当前公开 `main` 分支执行，GT/预测 mask 没有实际参与 `NewCrossAttention` 的输出计算。**
@@ -582,8 +591,9 @@ return (vi_loss_i + vi_loss_t) / 2
 **[COFNet 官方实现]** [`train.py:374-389`](https://github.com/li554/COFNet/blob/main/train.py#L374-L389)：
 
 ```python
-pred, vi_pool, ir_pool, fu_pool, mask_pool, layer_maskfs, layer_maskf_conv = \
-    model(imgs_rgb, imgs_ir, target_masks, p=opt.res_mode)
+pred, vi_pool, ir_pool, fu_pool, mask_pool, layer_maskfs, layer_maskf_conv = model(
+    imgs_rgb, imgs_ir, target_masks, p=opt.res_mode
+)
 detection_loss, re_loss, loss_items = compute_loss(pred, cu_targets, imgs_rgb.shape[-2:])
 mask_l = mask_loss(layer_maskf_conv, layer_maskfs, opt.loss_type)
 sim_v_l = sim_loss(vi_pool, mask_pool)
@@ -596,8 +606,7 @@ if opt.lamb[0] != 0 and opt.lamb[3] != 0:
 官方默认参数位于 [`train.py:578-580`](https://github.com/li554/COFNet/blob/main/train.py#L578-L580)：
 
 ```python
-parser.add_argument('--lamb', default=[1.0, 0, 0.15, 1.0],
-                    help='loss weights (re, sim_v, sim_r, mask)')
+parser.add_argument("--lamb", default=[1.0, 0, 0.15, 1.0], help="loss weights (re, sim_v, sim_r, mask)")
 ```
 
 这说明官方默认关闭 visible-mask 对比项、保留 infrared-mask 对比项 `0.15`。该数值属于 COFNet 默认值，**不是 S8 depth 对比损失的已验证权重**。
@@ -606,9 +615,11 @@ parser.add_argument('--lamb', default=[1.0, 0, 0.15, 1.0],
 
 ```python
 lcls, lbox, lobj, lrk, re_loss = (
-    torch.zeros(1, device=device), torch.zeros(1, device=device),
-    torch.zeros(1, device=device), torch.zeros(1, device=device),
-    torch.zeros(1, device=device)
+    torch.zeros(1, device=device),
+    torch.zeros(1, device=device),
+    torch.zeros(1, device=device),
+    torch.zeros(1, device=device),
+    torch.zeros(1, device=device),
 )
 # re_loss += self.mse_loss(pmask, tmask)
 ```
@@ -634,7 +645,13 @@ if self.return_mask:
 **[S8 已实现]** `ultralytics/nn/tasks.py:445-458`：
 
 ```python
-depth = depth_batch["img"] if isinstance(depth_batch, dict) else batch.get("depth_img") if depth_batch is None else depth_batch
+depth = (
+    depth_batch["img"]
+    if isinstance(depth_batch, dict)
+    else batch.get("depth_img")
+    if depth_batch is None
+    else depth_batch
+)
 preds = self.forward(batch["img"], depth) if preds is None else preds
 return self.criterion(preds, batch)
 ```
@@ -739,19 +756,19 @@ PMG mask IoU/Recall,
 
 ## 6. 对“小目标、曝光、过暗、depth 不起作用”的严谨判断
 
-| 用户观察 | 当前代码能证明什么 | 当前代码不能证明什么 |
-|---|---|---|
-| 遮挡后只露一角漏检 | S8 最细检测层是 P3/stride 8；P3 有 wavelet edge gate，但没有 GT/object mask | 不能证明漏检一定由 P3 分辨率、loss 或融合模块造成 |
-| 曝光叠件漏检 | 原始 S8 没有显式空间模态权重，RGB residual 固定保留 | 不能证明换成 depth 就一定能检测到 |
-| 过暗黑包裹漏检 | depth 分支确实进入 P3/P4/P5 融合 | 不能证明 depth 数据在这些样本中有效、已配准或有正确尺度 |
-| 感觉 depth 没起作用 | README 的 s3/s8 消融显示加入 Depth FPN 后整体指标有变化 | 不能由整体 mAP 推断曝光/暗场子集的 depth 贡献 |
+| 用户观察            | 当前代码能证明什么                                                          | 当前代码不能证明什么                                    |
+| ------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------- |
+| 遮挡后只露一角漏检  | S8 最细检测层是 P3/stride 8；P3 有 wavelet edge gate，但没有 GT/object mask | 不能证明漏检一定由 P3 分辨率、loss 或融合模块造成       |
+| 曝光叠件漏检        | 原始 S8 没有显式空间模态权重，RGB residual 固定保留                         | 不能证明换成 depth 就一定能检测到                       |
+| 过暗黑包裹漏检      | depth 分支确实进入 P3/P4/P5 融合                                            | 不能证明 depth 数据在这些样本中有效、已配准或有正确尺度 |
+| 感觉 depth 没起作用 | README 的 s3/s8 消融显示加入 Depth FPN 后整体指标有变化                     | 不能由整体 mAP 推断曝光/暗场子集的 depth 贡献           |
 
 README 的可核验消融为 `README_RGBD_S8.md:306-320`：
 
-| run | 结构 | best Mask mAP50-95 | final Mask mAP50-95 |
-|---|---|---:|---:|
-| s3 | CoordAttV2 + P3 wavelet | 0.79678 | 0.79603 |
-| s8 | CoordAttV2 + P3 wavelet + Depth FPN | 0.80303 | 0.79863 |
+| run | 结构                                | best Mask mAP50-95 | final Mask mAP50-95 |
+| --- | ----------------------------------- | -----------------: | ------------------: |
+| s3  | CoordAttV2 + P3 wavelet             |            0.79678 |             0.79603 |
+| s8  | CoordAttV2 + P3 wavelet + Depth FPN |            0.80303 |             0.79863 |
 
 按表中数值直接相减，s8 相对 s3 的 best 指标为 `+0.00625`，final 指标为 `+0.00260`。这只能说明 README 记录的整体指标存在小幅正差，不能替代难例子集实验。
 
@@ -805,17 +822,17 @@ occluded_corner / overexposed_stack / dark_black / normal
 
 ## 8. 需要修改的文件与可核验落点
 
-| 文件 | 现有证据位置 | 待实现内容 |
-|---|---|---|
-| `ultralytics/cfg/models/11/yolo11-seg.yaml` | `7-25` | 新增明确且默认关闭的 PMG/contrast 开关 |
-| `ultralytics/nn/tasks.py` | `1925-2000` | 定义 P3 PMG 或 mask-guided wrapper |
-| `ultralytics/nn/tasks.py` | `260-267` | 在 P3 融合调用点返回/使用 mask logits |
-| `ultralytics/nn/tasks.py` | `2938-3001` | 由 YAML 条件构建新模块 |
-| `ultralytics/nn/tasks.py` | `445-458` | 若严格复现 GT-guided train path，需要把 GT mask 送入 forward |
-| `ultralytics/utils/loss.py` | `474-556` | 汇总 `L_mask` 和可选 `L_depth-mask` |
-| `ultralytics/utils/loss.py` | `385-409` | 可复用实例 mask union/downsample 逻辑 |
-| `ultralytics/models/yolo/detect/train.py` | `113-126` | 仅在原始数据统计证明有问题后改 depth normalization |
-| `ultralytics/data/augment.py` | `1388-1393,1806-1817` | 仅在 depth 无效值定义确认后改 padding/valid mask |
+| 文件                                        | 现有证据位置          | 待实现内容                                                   |
+| ------------------------------------------- | --------------------- | ------------------------------------------------------------ |
+| `ultralytics/cfg/models/11/yolo11-seg.yaml` | `7-25`                | 新增明确且默认关闭的 PMG/contrast 开关                       |
+| `ultralytics/nn/tasks.py`                   | `1925-2000`           | 定义 P3 PMG 或 mask-guided wrapper                           |
+| `ultralytics/nn/tasks.py`                   | `260-267`             | 在 P3 融合调用点返回/使用 mask logits                        |
+| `ultralytics/nn/tasks.py`                   | `2938-3001`           | 由 YAML 条件构建新模块                                       |
+| `ultralytics/nn/tasks.py`                   | `445-458`             | 若严格复现 GT-guided train path，需要把 GT mask 送入 forward |
+| `ultralytics/utils/loss.py`                 | `474-556`             | 汇总 `L_mask` 和可选 `L_depth-mask`                          |
+| `ultralytics/utils/loss.py`                 | `385-409`             | 可复用实例 mask union/downsample 逻辑                        |
+| `ultralytics/models/yolo/detect/train.py`   | `113-126`             | 仅在原始数据统计证明有问题后改 depth normalization           |
+| `ultralytics/data/augment.py`               | `1388-1393,1806-1817` | 仅在 depth 无效值定义确认后改 padding/valid mask             |
 
 所有新功能必须默认关闭，确保 E0 能完整复现 S8；不能直接覆盖 S8 配置后再把结果称为原始 S8。
 

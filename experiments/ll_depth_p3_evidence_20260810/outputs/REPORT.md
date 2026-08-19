@@ -5,13 +5,13 @@
 
 ## 关键结果
 
-| 指标 | Mean | Median | 说明 |
-|---|---:|---:|---|
-| LL-depth Pearson r | 0.9572 | 0.9607 | LL 与原始 depth 的结构一致性。 |
-| LL-depth PSNR | 23.38 dB | 23.73 dB | LL 作为平滑重构的保真度。 |
-| LL energy share | 0.9860 | 0.9878 | Haar 系数中低频承载的能量比例。 |
-| HF-boundary AUC | 0.6299 | 0.6268 | 高频幅值对 GT mask 边界的区分度。 |
-| LL-gradient boundary AUC | 0.6642 | 0.6585 | LL 平滑后仍保留的边界梯度信号。 |
+| 指标                     |     Mean |   Median | 说明                              |
+| ------------------------ | -------: | -------: | --------------------------------- |
+| LL-depth Pearson r       |   0.9572 |   0.9607 | LL 与原始 depth 的结构一致性。    |
+| LL-depth PSNR            | 23.38 dB | 23.73 dB | LL 作为平滑重构的保真度。         |
+| LL energy share          |   0.9860 |   0.9878 | Haar 系数中低频承载的能量比例。   |
+| HF-boundary AUC          |   0.6299 |   0.6268 | 高频幅值对 GT mask 边界的区分度。 |
+| LL-gradient boundary AUC |   0.6642 |   0.6585 | LL 平滑后仍保留的边界梯度信号。   |
 
 ## 结论
 
