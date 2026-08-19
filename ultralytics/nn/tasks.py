@@ -1,4 +1,3 @@
-
 import contextlib
 import math
 import pickle
@@ -8,8 +7,8 @@ from copy import deepcopy
 from pathlib import Path
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+from torch import nn
 
 from ultralytics.nn.autobackend import check_class_names
 from ultralytics.nn.modules import (
@@ -116,13 +115,11 @@ def _init_yolov5_cmx_weights(m):
             m.bias.data.zero_()
 
 
-
 class BaseModel(torch.nn.Module):
-    """
-    Base class for all YOLO models in the Ultralytics family.
+    """Base class for all YOLO models in the Ultralytics family.
 
-    This class provides common functionality for YOLO models including forward pass handling, model fusion,
-    information display, and weight loading capabilities.
+    This class provides common functionality for YOLO models including forward pass handling, model fusion, information
+    display, and weight loading capabilities.
 
     Attributes:
         model (torch.nn.Module): The neural network model.
@@ -143,9 +140,8 @@ class BaseModel(torch.nn.Module):
         >>> model.info()  # Display model information
     """
 
-    def forward(self, x,  xd=None, *args, **kwargs):# 行程1
-        """
-        Perform forward pass of the model for either training or inference.
+    def forward(self, x, xd=None, *args, **kwargs):  # 行程1
+        """Perform forward pass of the model for either training or inference.
 
         If x is a dict, calculates and returns the loss for training. Otherwise, returns predictions for inference.
 
@@ -157,15 +153,13 @@ class BaseModel(torch.nn.Module):
         Returns:
             (torch.Tensor): Loss if x is a dict (training), or network predictions (inference).
         """
-        
         if isinstance(x, dict):  # for cases of training and validating while training.
             return self.loss(x, xd, *args, **kwargs)
         # 到这里要停止
         return self.predict(x, xd, *args, **kwargs)
 
-    def predict(self, x, xd=None, profile=False, visualize=False, augment=False, embed=None): #行程2
-        """
-        Perform a forward pass through the network.
+    def predict(self, x, xd=None, profile=False, visualize=False, augment=False, embed=None):  # 行程2
+        """Perform a forward pass through the network.
 
         Args:
             x (torch.Tensor): The input tensor to the model.
@@ -182,8 +176,7 @@ class BaseModel(torch.nn.Module):
         return self._predict_once(x, xd, profile, visualize, embed)
 
     def _predict_once(self, x, xd, profile=False, visualize=False, embed=None):
-        """
-        Perform a forward pass through the network.
+        """Perform a forward pass through the network.
 
         Args:
             x (torch.Tensor): The input tensor to the model.
@@ -249,9 +242,7 @@ class BaseModel(torch.nn.Module):
         # ── Phase 2: depth lightweight FPN (if enabled) ────────────────────
         if self.depth_fpn:
             depth_fpn_module = self.model[self._depth_fpn_index]
-            p3d, p4d, p5d = depth_fpn_module(
-                _depth_save_map[4], _depth_save_map[6], _depth_save_map[10]
-            )
+            p3d, p4d, p5d = depth_fpn_module(_depth_save_map[4], _depth_save_map[6], _depth_save_map[10])
             _depth_save_map[4], _depth_save_map[6], _depth_save_map[10] = p3d, p4d, p5d
         if collect_rgbd_aux and getattr(self, "_depth_aux_head_index", None) is not None:
             self._last_depth_aux_logits = self.model[self._depth_aux_head_index](_depth_save_map[4])
@@ -315,8 +306,7 @@ class BaseModel(torch.nn.Module):
         return self._predict_once(x)
 
     def _profile_one_layer(self, m, x, dt):
-        """
-        Profile the computation time and FLOPs of a single layer of the model on a given input.
+        """Profile the computation time and FLOPs of a single layer of the model on a given input.
 
         Args:
             m (torch.nn.Module): The layer to be profiled.
@@ -341,8 +331,7 @@ class BaseModel(torch.nn.Module):
             LOGGER.info(f"{sum(dt):10.2f} {'-':>10s} {'-':>10s}  Total")
 
     def fuse(self, verbose=True):
-        """
-        Fuse the `Conv2d()` and `BatchNorm2d()` layers of the model into a single layer for improved computation
+        """Fuse the `Conv2d()` and `BatchNorm2d()` layers of the model into a single layer for improved computation
         efficiency.
 
         Returns:
@@ -373,8 +362,7 @@ class BaseModel(torch.nn.Module):
         return self
 
     def is_fused(self, thresh=10):
-        """
-        Check if the model has less than a certain threshold of BatchNorm layers.
+        """Check if the model has less than a certain threshold of BatchNorm layers.
 
         Args:
             thresh (int, optional): The threshold number of BatchNorm layers.
@@ -386,8 +374,7 @@ class BaseModel(torch.nn.Module):
         return sum(isinstance(v, bn) for v in self.modules()) < thresh  # True if < 'thresh' BatchNorm layers in model
 
     def info(self, detailed=False, verbose=True, imgsz=640):
-        """
-        Print model information.
+        """Print model information.
 
         Args:
             detailed (bool): If True, prints out detailed information about the model.
@@ -397,8 +384,7 @@ class BaseModel(torch.nn.Module):
         return model_info(self, detailed=detailed, verbose=verbose, imgsz=imgsz)
 
     def _apply(self, fn):
-        """
-        Apply a function to all tensors in the model that are not parameters or registered buffers.
+        """Apply a function to all tensors in the model that are not parameters or registered buffers.
 
         Args:
             fn (function): The function to apply to the model.
@@ -417,8 +403,7 @@ class BaseModel(torch.nn.Module):
         return self
 
     def load(self, weights, verbose=True):
-        """
-        Load weights into the model.
+        """Load weights into the model.
 
         Args:
             weights (dict | torch.nn.Module): The pre-trained weights to be loaded.
@@ -442,9 +427,8 @@ class BaseModel(torch.nn.Module):
         if verbose:
             LOGGER.info(f"Transferred {len_updated_csd}/{len(self.model.state_dict())} items from pretrained weights")
 
-    def loss(self, batch, depth_batch=None, preds=None):# 行程1.1 
-        """
-        Compute loss.
+    def loss(self, batch, depth_batch=None, preds=None):  # 行程1.1
+        """Compute loss.
 
         Args:
             batch (dict): Batch to compute loss on.
@@ -452,8 +436,14 @@ class BaseModel(torch.nn.Module):
         """
         if getattr(self, "criterion", None) is None:
             self.criterion = self.init_criterion()
-        # 创建损失函数并传入img数据，然后再次回到forward函数 
-        depth = depth_batch["img"] if isinstance(depth_batch, dict) else batch.get("depth_img") if depth_batch is None else depth_batch
+        # 创建损失函数并传入img数据，然后再次回到forward函数
+        depth = (
+            depth_batch["img"]
+            if isinstance(depth_batch, dict)
+            else batch.get("depth_img")
+            if depth_batch is None
+            else depth_batch
+        )
         preds = self.forward(batch["img"], depth) if preds is None else preds
         return self.criterion(preds, batch)
 
@@ -463,11 +453,10 @@ class BaseModel(torch.nn.Module):
 
 
 class DetectionModel(BaseModel):
-    """
-    YOLO detection model.
+    """YOLO detection model.
 
-    This class implements the YOLO detection architecture, handling model initialization, forward pass,
-    augmented inference, and loss computation for object detection tasks.
+    This class implements the YOLO detection architecture, handling model initialization, forward pass, augmented
+    inference, and loss computation for object detection tasks.
 
     Attributes:
         yaml (dict): Model configuration dictionary.
@@ -492,8 +481,7 @@ class DetectionModel(BaseModel):
     """
 
     def __init__(self, cfg="yolo11n.yaml", ch=3, nc=None, verbose=True):
-        """
-        Initialize the YOLO detection model with the given config and parameters.
+        """Initialize the YOLO detection model with the given config and parameters.
 
         Args:
             cfg (str | dict): Model configuration file path or dictionary.
@@ -539,9 +527,7 @@ class DetectionModel(BaseModel):
         _fusion_start = _rgbd_extra_start + (1 if self.depth_fpn else 0)
         self._fusion_indices = [_fusion_start + i for i in range(3)]
         _gate_start = _fusion_start + 3
-        self._rgbd_reliability_gate_indices = (
-            [_gate_start + i for i in range(3)] if self.rgbd_reliability_gate else []
-        )
+        self._rgbd_reliability_gate_indices = [_gate_start + i for i in range(3)] if self.rgbd_reliability_gate else []
         _aux_start = _gate_start + (3 if self.rgbd_reliability_gate else 0)
         self._depth_aux_head_index = _aux_start if self.rgbd_depth_aux_loss else None
         # RGB backbone stage → absolute depth layer index (P3=4, P4=6, P5=10)
@@ -553,18 +539,22 @@ class DetectionModel(BaseModel):
             s = 256  # 2x min stride
             m.inplace = self.inplace
 
-            def _forward(x,xd):
+            def _forward(x, xd):
                 """Perform a forward pass through the model, handling different Detect subclass types accordingly."""
                 if self.end2end:
                     out = self.forward(x, xd)
                     one2many = out["one2many"]
                     # For Segment end2end, one2many is (feats, mc, p); for Detect end2end, it's feats list
                     return one2many[0] if isinstance(one2many, tuple) else one2many
-                return self.forward(x,xd)[0] if isinstance(m, (Segment, YOLOESegment, Pose, OBB)) else self.forward(x,xd)
+                return (
+                    self.forward(x, xd)[0] if isinstance(m, (Segment, YOLOESegment, Pose, OBB)) else self.forward(x, xd)
+                )
 
             self.model.eval()  # Avoid changing batch statistics until training begins
             m.training = True  # Setting it to True to properly return strides
-            m.stride = torch.tensor([s / x.shape[-2] for x in _forward(torch.zeros(1, ch, s, s),torch.zeros(1, ch, s, s))])  # forward
+            m.stride = torch.tensor(
+                [s / x.shape[-2] for x in _forward(torch.zeros(1, ch, s, s), torch.zeros(1, ch, s, s))]
+            )  # forward
             self.stride = m.stride
             self.model.train()  # Set model back to training(default) mode
             m.bias_init()  # only run once
@@ -578,8 +568,7 @@ class DetectionModel(BaseModel):
             LOGGER.info("")
 
     def _predict_augment(self, x):
-        """
-        Perform augmentations on input image x and return augmented inference and train outputs.
+        """Perform augmentations on input image x and return augmented inference and train outputs.
 
         Args:
             x (torch.Tensor): Input image tensor.
@@ -604,8 +593,7 @@ class DetectionModel(BaseModel):
 
     @staticmethod
     def _descale_pred(p, flips, scale, img_size, dim=1):
-        """
-        De-scale predictions following augmented inference (inverse operation).
+        """De-scale predictions following augmented inference (inverse operation).
 
         Args:
             p (torch.Tensor): Predictions tensor.
@@ -626,8 +614,7 @@ class DetectionModel(BaseModel):
         return torch.cat((x, y, wh, cls), dim)
 
     def _clip_augmented(self, y):
-        """
-        Clip YOLO augmented inference tails.
+        """Clip YOLO augmented inference tails.
 
         Args:
             y (list[torch.Tensor]): List of detection tensors.
@@ -653,11 +640,10 @@ class DetectionModel(BaseModel):
 
 
 class OBBModel(DetectionModel):
-    """
-    YOLO Oriented Bounding Box (OBB) model.
+    """YOLO Oriented Bounding Box (OBB) model.
 
-    This class extends DetectionModel to handle oriented bounding box detection tasks, providing specialized
-    loss computation for rotated object detection.
+    This class extends DetectionModel to handle oriented bounding box detection tasks, providing specialized loss
+    computation for rotated object detection.
 
     Methods:
         __init__: Initialize YOLO OBB model.
@@ -670,8 +656,7 @@ class OBBModel(DetectionModel):
     """
 
     def __init__(self, cfg="yolo11n-obb.yaml", ch=3, nc=None, verbose=True):
-        """
-        Initialize YOLO OBB model with given config and parameters.
+        """Initialize YOLO OBB model with given config and parameters.
 
         Args:
             cfg (str | dict): Model configuration file path or dictionary.
@@ -687,11 +672,10 @@ class OBBModel(DetectionModel):
 
 
 class SegmentationModel(DetectionModel):
-    """
-    YOLO segmentation model.
+    """YOLO segmentation model.
 
-    This class extends DetectionModel to handle instance segmentation tasks, providing specialized
-    loss computation for pixel-level object detection and segmentation.
+    This class extends DetectionModel to handle instance segmentation tasks, providing specialized loss computation for
+    pixel-level object detection and segmentation.
 
     Methods:
         __init__: Initialize YOLO segmentation model.
@@ -704,8 +688,7 @@ class SegmentationModel(DetectionModel):
     """
 
     def __init__(self, cfg="yolo11n-seg.yaml", ch=3, nc=None, verbose=True):
-        """
-        Initialize Ultralytics YOLO segmentation model with given config and parameters.
+        """Initialize Ultralytics YOLO segmentation model with given config and parameters.
 
         Args:
             cfg (str | dict): Model configuration file path or dictionary.
@@ -724,11 +707,10 @@ class SegmentationModel(DetectionModel):
 
 
 class PoseModel(DetectionModel):
-    """
-    YOLO pose model.
+    """YOLO pose model.
 
-    This class extends DetectionModel to handle human pose estimation tasks, providing specialized
-    loss computation for keypoint detection and pose estimation.
+    This class extends DetectionModel to handle human pose estimation tasks, providing specialized loss computation for
+    keypoint detection and pose estimation.
 
     Attributes:
         kpt_shape (tuple): Shape of keypoints data (num_keypoints, num_dimensions).
@@ -744,8 +726,7 @@ class PoseModel(DetectionModel):
     """
 
     def __init__(self, cfg="yolo11n-pose.yaml", ch=3, nc=None, data_kpt_shape=(None, None), verbose=True):
-        """
-        Initialize Ultralytics YOLO Pose model.
+        """Initialize Ultralytics YOLO Pose model.
 
         Args:
             cfg (str | dict): Model configuration file path or dictionary.
@@ -767,11 +748,10 @@ class PoseModel(DetectionModel):
 
 
 class ClassificationModel(BaseModel):
-    """
-    YOLO classification model.
+    """YOLO classification model.
 
-    This class implements the YOLO classification architecture for image classification tasks,
-    providing model initialization, configuration, and output reshaping capabilities.
+    This class implements the YOLO classification architecture for image classification tasks, providing model
+    initialization, configuration, and output reshaping capabilities.
 
     Attributes:
         yaml (dict): Model configuration dictionary.
@@ -792,8 +772,7 @@ class ClassificationModel(BaseModel):
     """
 
     def __init__(self, cfg="yolo11n-cls.yaml", ch=3, nc=None, verbose=True):
-        """
-        Initialize ClassificationModel with YAML, channels, number of classes, verbose flag.
+        """Initialize ClassificationModel with YAML, channels, number of classes, verbose flag.
 
         Args:
             cfg (str | dict): Model configuration file path or dictionary.
@@ -805,8 +784,7 @@ class ClassificationModel(BaseModel):
         self._from_yaml(cfg, ch, nc, verbose)
 
     def _from_yaml(self, cfg, ch, nc, verbose):
-        """
-        Set Ultralytics YOLO model configurations and define the model architecture.
+        """Set Ultralytics YOLO model configurations and define the model architecture.
 
         Args:
             cfg (str | dict): Model configuration file path or dictionary.
@@ -830,8 +808,7 @@ class ClassificationModel(BaseModel):
 
     @staticmethod
     def reshape_outputs(model, nc):
-        """
-        Update a TorchVision classification model to class count 'n' if required.
+        """Update a TorchVision classification model to class count 'n' if required.
 
         Args:
             model (torch.nn.Module): Model to update.
@@ -863,8 +840,7 @@ class ClassificationModel(BaseModel):
 
 
 class RTDETRDetectionModel(DetectionModel):
-    """
-    RTDETR (Real-time DEtection and Tracking using Transformers) Detection Model class.
+    """RTDETR (Real-time DEtection and Tracking using Transformers) Detection Model class.
 
     This class is responsible for constructing the RTDETR architecture, defining loss functions, and facilitating both
     the training and inference processes. RTDETR is an object detection and tracking model that extends from the
@@ -887,8 +863,7 @@ class RTDETRDetectionModel(DetectionModel):
     """
 
     def __init__(self, cfg="rtdetr-l.yaml", ch=3, nc=None, verbose=True):
-        """
-        Initialize the RTDETRDetectionModel.
+        """Initialize the RTDETRDetectionModel.
 
         Args:
             cfg (str | dict): Configuration file name or path.
@@ -905,8 +880,7 @@ class RTDETRDetectionModel(DetectionModel):
         return RTDETRDetectionLoss(nc=self.nc, use_vfl=True)
 
     def loss(self, batch, preds=None):
-        """
-        Compute the loss for the given batch of data.
+        """Compute the loss for the given batch of data.
 
         Args:
             batch (dict): Dictionary containing image and label data.
@@ -951,8 +925,7 @@ class RTDETRDetectionModel(DetectionModel):
         )
 
     def predict(self, x, profile=False, visualize=False, batch=None, augment=False, embed=None):
-        """
-        Perform a forward pass through the model.
+        """Perform a forward pass through the model.
 
         Args:
             x (torch.Tensor): The input tensor.
@@ -987,11 +960,10 @@ class RTDETRDetectionModel(DetectionModel):
 
 
 class WorldModel(DetectionModel):
-    """
-    YOLOv8 World Model.
+    """YOLOv8 World Model.
 
-    This class implements the YOLOv8 World model for open-vocabulary object detection, supporting text-based
-    class specification and CLIP model integration for zero-shot detection capabilities.
+    This class implements the YOLOv8 World model for open-vocabulary object detection, supporting text-based class
+    specification and CLIP model integration for zero-shot detection capabilities.
 
     Attributes:
         txt_feats (torch.Tensor): Text feature embeddings for classes.
@@ -1012,8 +984,7 @@ class WorldModel(DetectionModel):
     """
 
     def __init__(self, cfg="yolov8s-world.yaml", ch=3, nc=None, verbose=True):
-        """
-        Initialize YOLOv8 world model with given config and parameters.
+        """Initialize YOLOv8 world model with given config and parameters.
 
         Args:
             cfg (str | dict): Model configuration file path or dictionary.
@@ -1026,8 +997,7 @@ class WorldModel(DetectionModel):
         super().__init__(cfg=cfg, ch=ch, nc=nc, verbose=verbose)
 
     def set_classes(self, text, batch=80, cache_clip_model=True):
-        """
-        Set classes in advance so that model could do offline-inference without clip model.
+        """Set classes in advance so that model could do offline-inference without clip model.
 
         Args:
             text (list[str]): List of class names.
@@ -1038,8 +1008,7 @@ class WorldModel(DetectionModel):
         self.model[-1].nc = len(text)
 
     def get_text_pe(self, text, batch=80, cache_clip_model=True):
-        """
-        Set classes in advance so that model could do offline-inference without clip model.
+        """Set classes in advance so that model could do offline-inference without clip model.
 
         Args:
             text (list[str]): List of class names.
@@ -1062,8 +1031,7 @@ class WorldModel(DetectionModel):
         return txt_feats.reshape(-1, len(text), txt_feats.shape[-1])
 
     def predict(self, x, profile=False, visualize=False, txt_feats=None, augment=False, embed=None):
-        """
-        Perform a forward pass through the model.
+        """Perform a forward pass through the model.
 
         Args:
             x (torch.Tensor): The input tensor.
@@ -1107,8 +1075,7 @@ class WorldModel(DetectionModel):
         return x
 
     def loss(self, batch, preds=None):
-        """
-        Compute loss.
+        """Compute loss.
 
         Args:
             batch (dict): Batch to compute loss on.
@@ -1123,11 +1090,10 @@ class WorldModel(DetectionModel):
 
 
 class YOLOEModel(DetectionModel):
-    """
-    YOLOE detection model.
+    """YOLOE detection model.
 
-    This class implements the YOLOE architecture for efficient object detection with text and visual prompts,
-    supporting both prompt-based and prompt-free inference modes.
+    This class implements the YOLOE architecture for efficient object detection with text and visual prompts, supporting
+    both prompt-based and prompt-free inference modes.
 
     Attributes:
         pe (torch.Tensor): Prompt embeddings for classes.
@@ -1151,8 +1117,7 @@ class YOLOEModel(DetectionModel):
     """
 
     def __init__(self, cfg="yoloe-v8s.yaml", ch=3, nc=None, verbose=True):
-        """
-        Initialize YOLOE model with given config and parameters.
+        """Initialize YOLOE model with given config and parameters.
 
         Args:
             cfg (str | dict): Model configuration file path or dictionary.
@@ -1164,8 +1129,7 @@ class YOLOEModel(DetectionModel):
 
     @smart_inference_mode()
     def get_text_pe(self, text, batch=80, cache_clip_model=False, without_reprta=False):
-        """
-        Set classes in advance so that model could do offline-inference without clip model.
+        """Set classes in advance so that model could do offline-inference without clip model.
 
         Args:
             text (list[str]): List of class names.
@@ -1198,8 +1162,7 @@ class YOLOEModel(DetectionModel):
 
     @smart_inference_mode()
     def get_visual_pe(self, img, visual):
-        """
-        Get visual embeddings.
+        """Get visual embeddings.
 
         Args:
             img (torch.Tensor): Input image tensor.
@@ -1211,8 +1174,7 @@ class YOLOEModel(DetectionModel):
         return self(img, vpe=visual, return_vpe=True)
 
     def set_vocab(self, vocab, names):
-        """
-        Set vocabulary for the prompt-free model.
+        """Set vocabulary for the prompt-free model.
 
         Args:
             vocab (nn.ModuleList): List of vocabulary items.
@@ -1240,8 +1202,7 @@ class YOLOEModel(DetectionModel):
         self.names = check_class_names(names)
 
     def get_vocab(self, names):
-        """
-        Get fused vocabulary layer from the model.
+        """Get fused vocabulary layer from the model.
 
         Args:
             names (list): List of class names.
@@ -1266,8 +1227,7 @@ class YOLOEModel(DetectionModel):
         return vocab
 
     def set_classes(self, names, embeddings):
-        """
-        Set classes in advance so that model could do offline-inference without clip model.
+        """Set classes in advance so that model could do offline-inference without clip model.
 
         Args:
             names (list[str]): List of class names.
@@ -1282,8 +1242,7 @@ class YOLOEModel(DetectionModel):
         self.names = check_class_names(names)
 
     def get_cls_pe(self, tpe, vpe):
-        """
-        Get class positional embeddings.
+        """Get class positional embeddings.
 
         Args:
             tpe (torch.Tensor, optional): Text positional embeddings.
@@ -1306,8 +1265,7 @@ class YOLOEModel(DetectionModel):
     def predict(
         self, x, profile=False, visualize=False, tpe=None, augment=False, embed=None, vpe=None, return_vpe=False
     ):
-        """
-        Perform a forward pass through the model.
+        """Perform a forward pass through the model.
 
         Args:
             x (torch.Tensor): The input tensor.
@@ -1354,8 +1312,7 @@ class YOLOEModel(DetectionModel):
         return x
 
     def loss(self, batch, preds=None):
-        """
-        Compute loss.
+        """Compute loss.
 
         Args:
             batch (dict): Batch to compute loss on.
@@ -1373,11 +1330,10 @@ class YOLOEModel(DetectionModel):
 
 
 class YOLOESegModel(YOLOEModel, SegmentationModel):
-    """
-    YOLOE segmentation model.
+    """YOLOE segmentation model.
 
-    This class extends YOLOEModel to handle instance segmentation tasks with text and visual prompts,
-    providing specialized loss computation for pixel-level object detection and segmentation.
+    This class extends YOLOEModel to handle instance segmentation tasks with text and visual prompts, providing
+    specialized loss computation for pixel-level object detection and segmentation.
 
     Methods:
         __init__: Initialize YOLOE segmentation model.
@@ -1390,8 +1346,7 @@ class YOLOESegModel(YOLOEModel, SegmentationModel):
     """
 
     def __init__(self, cfg="yoloe-v8s-seg.yaml", ch=3, nc=None, verbose=True):
-        """
-        Initialize YOLOE segmentation model with given config and parameters.
+        """Initialize YOLOE segmentation model with given config and parameters.
 
         Args:
             cfg (str | dict): Model configuration file path or dictionary.
@@ -1402,8 +1357,7 @@ class YOLOESegModel(YOLOEModel, SegmentationModel):
         super().__init__(cfg=cfg, ch=ch, nc=nc, verbose=verbose)
 
     def loss(self, batch, preds=None):
-        """
-        Compute loss.
+        """Compute loss.
 
         Args:
             batch (dict): Batch to compute loss on.
@@ -1421,11 +1375,10 @@ class YOLOESegModel(YOLOEModel, SegmentationModel):
 
 
 class Ensemble(torch.nn.ModuleList):
-    """
-    Ensemble of models.
+    """Ensemble of models.
 
-    This class allows combining multiple YOLO models into an ensemble for improved performance through
-    model averaging or other ensemble techniques.
+    This class allows combining multiple YOLO models into an ensemble for improved performance through model averaging
+    or other ensemble techniques.
 
     Methods:
         __init__: Initialize an ensemble of models.
@@ -1444,8 +1397,7 @@ class Ensemble(torch.nn.ModuleList):
         super().__init__()
 
     def forward(self, x, augment=False, profile=False, visualize=False):
-        """
-        Generate the YOLO network's final layer.
+        """Generate the YOLO network's final layer.
 
         Args:
             x (torch.Tensor): Input tensor.
@@ -1469,12 +1421,11 @@ class Ensemble(torch.nn.ModuleList):
 
 @contextlib.contextmanager
 def temporary_modules(modules=None, attributes=None):
-    """
-    Context manager for temporarily adding or modifying modules in Python's module cache (`sys.modules`).
+    """Context manager for temporarily adding or modifying modules in Python's module cache (`sys.modules`).
 
-    This function can be used to change the module paths during runtime. It's useful when refactoring code,
-    where you've moved a module from one location to another, but you still want to support the old import
-    paths for backwards compatibility.
+    This function can be used to change the module paths during runtime. It's useful when refactoring code, where you've
+    moved a module from one location to another, but you still want to support the old import paths for backwards
+    compatibility.
 
     Args:
         modules (dict, optional): A dictionary mapping old module paths to new module paths.
@@ -1485,7 +1436,7 @@ def temporary_modules(modules=None, attributes=None):
         >>> import old.module  # this will now import new.module
         >>> from old.module import attribute  # this will now import new.module.attribute
 
-    Note:
+    Notes:
         The changes are only in effect inside the context manager and are undone once the context manager exits.
         Be aware that directly manipulating `sys.modules` can lead to unpredictable results, especially in larger
         applications or libraries. Use this function with caution.
@@ -1521,19 +1472,16 @@ class SafeClass:
 
     def __init__(self, *args, **kwargs):
         """Initialize SafeClass instance, ignoring all arguments."""
-        pass
 
     def __call__(self, *args, **kwargs):
         """Run SafeClass instance, ignoring all arguments."""
-        pass
 
 
 class SafeUnpickler(pickle.Unpickler):
     """Custom Unpickler that replaces unknown classes with SafeClass."""
 
     def find_class(self, module, name):
-        """
-        Attempt to find a class, returning SafeClass if not among safe modules.
+        """Attempt to find a class, returning SafeClass if not among safe modules.
 
         Args:
             module (str): Module name.
@@ -1558,10 +1506,9 @@ class SafeUnpickler(pickle.Unpickler):
 
 
 def torch_safe_load(weight, safe_only=False):
-    """
-    Attempt to load a PyTorch model with the torch.load() function. If a ModuleNotFoundError is raised, it catches the
-    error, logs a warning message, and attempts to install the missing module via the check_requirements() function.
-    After installation, the function again attempts to load the model using torch.load().
+    """Attempt to load a PyTorch model with the torch.load() function. If a ModuleNotFoundError is raised, it catches
+    the error, logs a warning message, and attempts to install the missing module via the check_requirements()
+    function. After installation, the function again attempts to load the model using torch.load().
 
     Args:
         weight (str): The file path of the PyTorch model.
@@ -1640,8 +1587,7 @@ def torch_safe_load(weight, safe_only=False):
 
 
 def load_checkpoint(weight, device=None, inplace=True, fuse=False):
-    """
-    Load a single model weights.
+    """Load a single model weights.
 
     Args:
         weight (str | Path): Model weight path.
@@ -1675,19 +1621,21 @@ def load_checkpoint(weight, device=None, inplace=True, fuse=False):
 
     # Return model and ckpt
     return model, ckpt
-#融合模块开始
+
+
+# 融合模块开始
 class h_sigmoid(nn.Module):
     def __init__(self, inplace=True):
-        super(h_sigmoid, self).__init__()
+        super().__init__()
         self.relu = nn.ReLU6(inplace=inplace)
 
     def forward(self, x):
         return self.relu(x + 3) / 6
-    
-    
+
+
 class h_swish(nn.Module):
     def __init__(self, inplace=True):
-        super(h_swish, self).__init__()
+        super().__init__()
         self.sigmoid = h_sigmoid(inplace=inplace)
 
     def forward(self, x):
@@ -1696,9 +1644,9 @@ class h_swish(nn.Module):
 
 class SA_Enhance(nn.Module):
     def __init__(self, kernel_size=7):
-        super(SA_Enhance, self).__init__()
+        super().__init__()
 
-        assert kernel_size in (3, 7), 'kernel size must be 3 or 7'
+        assert kernel_size in (3, 7), "kernel size must be 3 or 7"
         padding = 3 if kernel_size == 7 else 1
 
         self.conv1 = nn.Conv2d(1, 1, kernel_size, padding=padding, bias=False)
@@ -1713,7 +1661,7 @@ class SA_Enhance(nn.Module):
 
 class CoordAtt(nn.Module):
     def __init__(self, inp, oup, reduction=32):
-        super(CoordAtt, self).__init__()
+        super().__init__()
         self.pool_h = nn.AdaptiveAvgPool2d((None, 1))
         self.pool_w = nn.AdaptiveAvgPool2d((1, None))
 
@@ -1731,7 +1679,7 @@ class CoordAtt(nn.Module):
     def forward(self, rgb, depth):
         x = torch.cat((rgb, depth), dim=1)
 
-        n, c, h, w = x.size()
+        _n, _c, h, w = x.size()
         x_h = self.pool_h(x)
         x_w = self.pool_w(x).permute(0, 1, 3, 2)
 
@@ -1752,25 +1700,24 @@ class CoordAtt(nn.Module):
         out = self.conv_end(out)
 
         return out
-#融合模块结束
+
+
+# 融合模块结束
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CoordAtt V2  — fixes residual / SA redundancy / channel reduction issues
 # ─────────────────────────────────────────────────────────────────────────────
 
-class CoordAttV2(nn.Module):
-    """
-    Improved coordinate attention for RGB-D fusion.
-    vs V1: residual connection, no redundant SA_Enhance, proper channel projection.
 
-    When adaptive_gate=True, the hard-coded `rgb + out` residual is replaced by
-    a learned modality gate:  α·rgb + (1−α)·depth + out.
-    gate_mode controls how α is predicted:
-      'channel'         — global per-channel, α is [B, half, 1, 1] (original).
-      'spatial'         — region-level single map, α is [B, 1, H, W].
-      'spatial_channel' — region-level per-channel, α is [B, half, H, W].
-      'spatial_illum'   — 'spatial' + local brightness/contrast prior of rgb.
+class CoordAttV2(nn.Module):
+    """Improved coordinate attention for RGB-D fusion. vs V1: residual connection, no redundant SA_Enhance, proper
+    channel projection.
+
+    When adaptive_gate=True, the hard-coded `rgb + out` residual is replaced by a learned modality gate: α·rgb +
+    (1−α)·depth + out. gate_mode controls how α is predicted: 'channel' — global per-channel, α is [B, half, 1, 1]
+    (original). 'spatial' — region-level single map, α is [B, 1, H, W]. 'spatial_channel' — region-level per-channel, α
+    is [B, half, H, W]. 'spatial_illum' — 'spatial' + local brightness/contrast prior of rgb.
     """
 
     def __init__(
@@ -1846,7 +1793,7 @@ class CoordAttV2(nn.Module):
     def forward(self, rgb, depth):
         x = torch.cat((rgb, depth), dim=1)
 
-        n, c, h, w = x.size()
+        _n, _c, h, w = x.size()
         x_h = self.pool_h(x)
         x_w = self.pool_w(x).permute(0, 1, 3, 2)
 
@@ -1985,6 +1932,7 @@ class RGBDWaveletGuidedCoordAttV2(nn.Module):
 # Depth Lightweight FPN  (enabled via  depth_fpn: True  in YAML)
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class DepthLightFPN(nn.Module):
     """Top-down FPN for the depth branch — gives depth multi-scale context before fusion."""
 
@@ -2048,13 +1996,12 @@ class RGBDRelativeReliabilityGate(nn.Module):
 # Options: 'se' | 'mamba' | 'cross_v1' | 'cross_v2' | 'coord_att' | 'cmm'
 # ─────────────────────────────────────────────────────────────────────────────
 
-class RGBDCoordAtt(nn.Module):
-    """
-    CoordAtt adapter for the unified rgbd_fusion API.
 
-    Wraps CoordAtt(inp=c_in*2, oup=c_in*2) so it accepts the standard
-    (c_in, num_heads, kv_pool) constructor and forward(rgb, depth) signature.
-    Internally: cat(rgb, depth) → CoordAtt coordinate attention → 512ch output.
+class RGBDCoordAtt(nn.Module):
+    """CoordAtt adapter for the unified rgbd_fusion API.
+
+    Wraps CoordAtt(inp=c_in*2, oup=c_in*2) so it accepts the standard (c_in, num_heads, kv_pool) constructor and
+    forward(rgb, depth) signature. Internally: cat(rgb, depth) → CoordAtt coordinate attention → 512ch output.
     """
 
     def __init__(self, c_in, num_heads=8, kv_pool=10, **kwargs):
@@ -2063,6 +2010,7 @@ class RGBDCoordAtt(nn.Module):
 
     def forward(self, rgb, depth):
         return self.coord_att(rgb, depth)
+
 
 class RGBDConcatFusion(nn.Module):
     """Simple concat baseline: cat(RGB, X) followed by a 1x1 projection."""
@@ -2160,7 +2108,7 @@ class _YOLOv5CrossAttention(nn.Module):
         self.dim = dim
         self.num_heads = num_heads
         head_dim = dim // num_heads
-        self.scale = qk_scale or head_dim ** -0.5
+        self.scale = qk_scale or head_dim**-0.5
         self.kv1 = nn.Linear(dim, dim * 2, bias=qkv_bias)
         self.kv2 = nn.Linear(dim, dim * 2, bias=qkv_bias)
 
@@ -2245,7 +2193,7 @@ class _YOLOv5FeatureFusionModule(nn.Module):
         self.apply(_init_yolov5_cmx_weights)
 
     def forward(self, x1, x2):
-        b, c, h, w = x1.shape
+        _b, _c, h, w = x1.shape
         x1 = x1.flatten(2).transpose(1, 2)
         x2 = x2.flatten(2).transpose(1, 2)
         x1, x2 = self.cross(x1, x2)
@@ -2331,10 +2279,8 @@ class RGBDWaveletHFFusion(nn.Module):
 
 
 class RGBDWaveletAdaptiveFusion(nn.Module):
-    """
-    Adaptive wavelet fusion — uses BOTH low-freq and high-freq bands from Haar
-    decomposition, with a learned gate to balance their contribution.
-    Replaces RGBDWaveletHFFusion which discards LL entirely.
+    """Adaptive wavelet fusion — uses BOTH low-freq and high-freq bands from Haar decomposition, with a learned gate to
+    balance their contribution. Replaces RGBDWaveletHFFusion which discards LL entirely.
     """
 
     def __init__(self, c_in, num_heads=8, kv_pool=10, base_fusion_cls=RGBDCoordAtt, **fusion_kwargs):
@@ -2466,33 +2412,34 @@ class RGBDScaleAwareWaveletFusion(nn.Module):
         gate = torch.sigmoid(self.gate(torch.cat((rgb, depth_band), dim=1)))
         return rgb + (fused - rgb) * gate
 
+
 class RGBDCrossAttentionV1(nn.Module):
-    """
-    Full-dimension RGB-D cross-attention (v1 original).
-    Q=RGB, KV=depth (pooled to kv_pool×kv_pool). Channel SE gate + spatial attn.
-    Highest capacity — most prone to overfitting on small datasets.
+    """Full-dimension RGB-D cross-attention (v1 original). Q=RGB, KV=depth (pooled to kv_pool×kv_pool). Channel SE gate
+    + spatial attn. Highest capacity — most prone to overfitting on small datasets.
     """
 
     def __init__(self, c_in, num_heads=8, kv_pool=10, **kwargs):
         super().__init__()
         assert c_in % num_heads == 0
         self.num_heads = num_heads
-        self.head_dim  = c_in // num_heads
-        self.scale     = self.head_dim ** -0.5
-        self.kv_pool   = kv_pool
+        self.head_dim = c_in // num_heads
+        self.scale = self.head_dim**-0.5
+        self.kv_pool = kv_pool
 
-        self.norm_rgb   = nn.GroupNorm(min(32, c_in // 16), c_in)
+        self.norm_rgb = nn.GroupNorm(min(32, c_in // 16), c_in)
         self.norm_depth = nn.GroupNorm(min(32, c_in // 16), c_in)
-        self.proj_q   = nn.Conv2d(c_in, c_in, 1, bias=False)
-        self.proj_k   = nn.Conv2d(c_in, c_in, 1, bias=False)
-        self.proj_v   = nn.Conv2d(c_in, c_in, 1, bias=False)
+        self.proj_q = nn.Conv2d(c_in, c_in, 1, bias=False)
+        self.proj_k = nn.Conv2d(c_in, c_in, 1, bias=False)
+        self.proj_v = nn.Conv2d(c_in, c_in, 1, bias=False)
         self.proj_out = nn.Conv2d(c_in, c_in, 1, bias=False)
 
         r = max(c_in // 16, 8)
         self.ch_gate = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
-            nn.Conv2d(c_in, r, 1, bias=False), nn.ReLU(inplace=True),
-            nn.Conv2d(r, c_in, 1, bias=False), nn.Tanh(),
+            nn.Conv2d(c_in, r, 1, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(r, c_in, 1, bias=False),
+            nn.Tanh(),
         )
         self.gamma = nn.Parameter(torch.ones(1) * 0.5)
 
@@ -2500,7 +2447,7 @@ class RGBDCrossAttentionV1(nn.Module):
         B, C, H, W = rgb.shape
         h, d = self.num_heads, self.head_dim
 
-        rgb_ch  = rgb + rgb * self.ch_gate(depth)
+        rgb_ch = rgb + rgb * self.ch_gate(depth)
         depth_n = self.norm_depth(depth)
         Q = self.proj_q(self.norm_rgb(rgb))
         K = self.proj_k(depth_n)
@@ -2516,14 +2463,12 @@ class RGBDCrossAttentionV1(nn.Module):
         V = V.reshape(B, h, d, Kh * Kw).permute(0, 1, 3, 2)
 
         attn = (Q @ K.transpose(-2, -1)) * self.scale
-        out  = (attn.softmax(dim=-1) @ V).permute(0, 1, 3, 2).reshape(B, C, H, W)
+        out = (attn.softmax(dim=-1) @ V).permute(0, 1, 3, 2).reshape(B, C, H, W)
         return rgb_ch + self.gamma * self.proj_out(out)
 
 
 class RGBDCrossAttentionV2(nn.Module):
-    """
-    Reduced-dim RGB-D cross-attention (v2).
-    QKV projected to c_in//2 (half params vs V1), attention dropout=0.1.
+    """Reduced-dim RGB-D cross-attention (v2). QKV projected to c_in//2 (half params vs V1), attention dropout=0.1.
     Better regularized than V1 but still more params than SE/Mamba.
     """
 
@@ -2532,32 +2477,34 @@ class RGBDCrossAttentionV2(nn.Module):
         c_mid = c_in // 2
         assert c_mid % num_heads == 0
         self.num_heads = num_heads
-        self.head_dim  = c_mid // num_heads
-        self.scale     = self.head_dim ** -0.5
-        self.kv_pool   = kv_pool
-        self.c_mid     = c_mid
+        self.head_dim = c_mid // num_heads
+        self.scale = self.head_dim**-0.5
+        self.kv_pool = kv_pool
+        self.c_mid = c_mid
 
-        self.norm_rgb   = nn.GroupNorm(min(32, c_in // 16), c_in)
+        self.norm_rgb = nn.GroupNorm(min(32, c_in // 16), c_in)
         self.norm_depth = nn.GroupNorm(min(32, c_in // 16), c_in)
-        self.proj_q   = nn.Conv2d(c_in, c_mid, 1, bias=False)
-        self.proj_k   = nn.Conv2d(c_in, c_mid, 1, bias=False)
-        self.proj_v   = nn.Conv2d(c_in, c_mid, 1, bias=False)
+        self.proj_q = nn.Conv2d(c_in, c_mid, 1, bias=False)
+        self.proj_k = nn.Conv2d(c_in, c_mid, 1, bias=False)
+        self.proj_v = nn.Conv2d(c_in, c_mid, 1, bias=False)
         self.proj_out = nn.Conv2d(c_mid, c_in, 1, bias=False)
         self.attn_drop = nn.Dropout(0.1)
 
         r = max(c_in // 16, 8)
         self.ch_gate = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
-            nn.Conv2d(c_in, r, 1, bias=False), nn.ReLU(inplace=True),
-            nn.Conv2d(r, c_in, 1, bias=False), nn.Tanh(),
+            nn.Conv2d(c_in, r, 1, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(r, c_in, 1, bias=False),
+            nn.Tanh(),
         )
         self.gamma = nn.Parameter(torch.ones(1) * 0.5)
 
     def forward(self, rgb, depth):
-        B, C, H, W = rgb.shape
+        B, _C, H, W = rgb.shape
         h, d = self.num_heads, self.head_dim
 
-        rgb_ch  = rgb + rgb * self.ch_gate(depth)
+        rgb_ch = rgb + rgb * self.ch_gate(depth)
         depth_n = self.norm_depth(depth)
         Q = self.proj_q(self.norm_rgb(rgb))
         K = self.proj_k(depth_n)
@@ -2573,18 +2520,16 @@ class RGBDCrossAttentionV2(nn.Module):
         V = V.reshape(B, h, d, Kh * Kw).permute(0, 1, 3, 2)
 
         attn = self.attn_drop((Q @ K.transpose(-2, -1)) * self.scale).softmax(dim=-1)
-        out  = (attn @ V).permute(0, 1, 3, 2).reshape(B, self.c_mid, H, W)
+        out = (attn @ V).permute(0, 1, 3, 2).reshape(B, self.c_mid, H, W)
         return rgb_ch + self.gamma * self.proj_out(out)
 
 
 class RGBDMambaFusion(nn.Module):
-    """
-    Mamba-inspired cross-modal fusion for RGB-D (pure PyTorch, no mamba-ssm).
+    """Mamba-inspired cross-modal fusion for RGB-D (pure PyTorch, no mamba-ssm).
 
-    Depth features are scanned row-wise and col-wise as 1D sequences via
-    depthwise Conv1d, approximating SSM sequential state propagation.
-    Produces a spatially-aware (H×W) gate — unlike SE (single vector per channel)
-    this preserves spatial structure. O(N) complexity vs O(N²) for cross-attention.
+    Depth features are scanned row-wise and col-wise as 1D sequences via depthwise Conv1d, approximating SSM sequential
+    state propagation. Produces a spatially-aware (H×W) gate — unlike SE (single vector per channel) this preserves
+    spatial structure. O(N) complexity vs O(N²) for cross-attention.
 
     Args:
         c_in (int): Channel dimension of both RGB and Depth features.
@@ -2594,19 +2539,19 @@ class RGBDMambaFusion(nn.Module):
 
     def __init__(self, c_in, num_heads=8, kv_pool=10, **kwargs):
         super().__init__()
-        d = max(c_in // 4, 32)   # inner scan channels
-        self.proj_in  = nn.Conv2d(c_in, d, 1, bias=False)
+        d = max(c_in // 4, 32)  # inner scan channels
+        self.proj_in = nn.Conv2d(c_in, d, 1, bias=False)
         self.row_scan = nn.Conv1d(d, d, kernel_size=7, padding=3, groups=d, bias=False)
         self.col_scan = nn.Conv1d(d, d, kernel_size=7, padding=3, groups=d, bias=False)
-        self.mix      = nn.Conv2d(d * 2, d, 1, bias=False)
+        self.mix = nn.Conv2d(d * 2, d, 1, bias=False)
         self.proj_gate = nn.Sequential(
             nn.Conv2d(d, c_in, 1, bias=False),
             nn.Tanh(),
         )
 
     def forward(self, rgb, depth):
-        B, C, H, W = depth.shape
-        x = self.proj_in(depth)       # (B, d, H, W)
+        B, _C, H, W = depth.shape
+        x = self.proj_in(depth)  # (B, d, H, W)
         d = x.shape[1]
 
         # Row scan: each row is a length-W sequence
@@ -2618,17 +2563,15 @@ class RGBDMambaFusion(nn.Module):
         x_col = self.col_scan(x_col).view(B, d, W, H).permute(0, 1, 3, 2)
 
         gate = self.proj_gate(self.mix(torch.cat([x_row, x_col], dim=1)))
-        return rgb + rgb * gate       # spatial-aware depth gating, identity when gate=0
+        return rgb + rgb * gate  # spatial-aware depth gating, identity when gate=0
 
 
 class RGBDCrossAttention(nn.Module):
-    """
-    Depth-guided Channel Gate for RGB-D feature fusion (cross-modal SE, default).
+    """Depth-guided Channel Gate for RGB-D feature fusion (cross-modal SE, default).
 
-    Depth features are globally squeezed and used to generate a per-channel
-    gate that modulates RGB features. Tanh gate ∈ (-1, 1) allows the depth
-    context to both enhance and suppress individual RGB channels.
-    Output = rgb + rgb * tanh(gate(depth)), which is identity when gate=0.
+    Depth features are globally squeezed and used to generate a per-channel gate that modulates RGB features. Tanh gate
+    ∈ (-1, 1) allows the depth context to both enhance and suppress individual RGB channels. Output = rgb + rgb *
+    tanh(gate(depth)), which is identity when gate=0.
 
     Args:
         c_in (int): Channel dimension of both RGB and Depth features.
@@ -2640,60 +2583,56 @@ class RGBDCrossAttention(nn.Module):
         super().__init__()
         r = max(c_in // 16, 8)  # SE reduction ratio
         self.ch_gate = nn.Sequential(
-            nn.AdaptiveAvgPool2d(1),           # (B, C, 1, 1) — global depth context
+            nn.AdaptiveAvgPool2d(1),  # (B, C, 1, 1) — global depth context
             nn.Conv2d(c_in, r, 1, bias=False),
             nn.ReLU(inplace=True),
             nn.Conv2d(r, c_in, 1, bias=False),
-            nn.Tanh(),                          # gate ∈ (-1, 1): can enhance or suppress
+            nn.Tanh(),  # gate ∈ (-1, 1): can enhance or suppress
         )
 
     def forward(self, rgb, depth):
-        gate = self.ch_gate(depth)   # (B, C, 1, 1)
-        return rgb + rgb * gate      # rgb * (1 + gate); identity when gate=0
+        gate = self.ch_gate(depth)  # (B, C, 1, 1)
+        return rgb + rgb * gate  # rgb * (1 + gate); identity when gate=0
 
 
 class _CMMBlock(nn.Module):
-    """
-    Lightweight Mamba-like block for 2-D feature maps (pure PyTorch).
+    """Lightweight Mamba-like block for 2-D feature maps (pure PyTorch).
 
-    Flattens H×W into a 1-D spatial sequence, applies:
-      LayerNorm → Linear(expand) → DepthwiseConv1d + SiLU → Linear(contract)
-    then adds a residual connection and reshapes back to (B,C,H,W).
-    Approximates SSM sequential state propagation without mamba-ssm.
+    Flattens H×W into a 1-D spatial sequence, applies: LayerNorm → Linear(expand) → DepthwiseConv1d + SiLU →
+    Linear(contract) then adds a residual connection and reshapes back to (B,C,H,W). Approximates SSM sequential state
+    propagation without mamba-ssm.
     """
 
     def __init__(self, c_in, expand=2, kernel_size=7):
         super().__init__()
         c_mid = c_in * expand
-        self.norm     = nn.LayerNorm(c_in)
-        self.in_proj  = nn.Linear(c_in, c_mid, bias=False)
-        self.dw_conv  = nn.Conv1d(c_mid, c_mid, kernel_size,
-                                   padding=kernel_size // 2, groups=c_mid, bias=True)
-        self.act      = nn.SiLU()
+        self.norm = nn.LayerNorm(c_in)
+        self.in_proj = nn.Linear(c_in, c_mid, bias=False)
+        self.dw_conv = nn.Conv1d(c_mid, c_mid, kernel_size, padding=kernel_size // 2, groups=c_mid, bias=True)
+        self.act = nn.SiLU()
         self.out_proj = nn.Linear(c_mid, c_in, bias=False)
 
     def forward(self, x):
         B, C, H, W = x.shape
-        x_flat = x.permute(0, 2, 3, 1).reshape(B, H * W, C)   # (B, N, C)
+        x_flat = x.permute(0, 2, 3, 1).reshape(B, H * W, C)  # (B, N, C)
         x_norm = self.norm(x_flat)
-        x_proj = self.in_proj(x_norm)                           # (B, N, c_mid)
-        x_conv = self.dw_conv(x_proj.transpose(1, 2))          # (B, c_mid, N)
-        x_act  = self.act(x_conv).transpose(1, 2)              # (B, N, c_mid)
-        x_out  = self.out_proj(x_act)                          # (B, N, C)
+        x_proj = self.in_proj(x_norm)  # (B, N, c_mid)
+        x_conv = self.dw_conv(x_proj.transpose(1, 2))  # (B, c_mid, N)
+        x_act = self.act(x_conv).transpose(1, 2)  # (B, N, c_mid)
+        x_out = self.out_proj(x_act)  # (B, N, C)
         return (x_flat + x_out).reshape(B, H, W, C).permute(0, 3, 1, 2)
 
 
 class RGBDCrossModalMamba(nn.Module):
-    """
-    CMM (Cross-Modal Fusion Mamba) from MambaSOD (arXiv 2410.15015).
+    """CMM (Cross-Modal Fusion Mamba) from MambaSOD (arXiv 2410.15015).
 
     Three-branch design (all branches use _CMMBlock as a lightweight Mamba):
-      1. Self-RGB   : RGB   → _CMMBlock(C)   → y_r
-      2. Self-Depth : Depth → _CMMBlock(C)   → y_d
-      3. Joint      : cat(RGB, Depth) → _CMMBlock(2C) → gate_proj → g  (C ch)
+    1. Self-RGB   : RGB   → _CMMBlock(C)   → y_r
+    2. Self-Depth : Depth → _CMMBlock(C)   → y_d
+    3. Joint      : cat(RGB, Depth) → _CMMBlock(2C) → gate_proj → g  (C ch)
 
-    Gated fusion: rgb + γ × (y_r × σ(g) + y_d × σ(g))
-    γ is a learnable scalar initialised to 0 (identity at init → stable training).
+    Gated fusion: rgb + γ × (y_r × σ(g) + y_d × σ(g)) γ is a learnable scalar initialized to 0 (identity at init →
+    stable training).
 
     Args:
         c_in (int): Channel dimension of both RGB and Depth features.
@@ -2703,28 +2642,25 @@ class RGBDCrossModalMamba(nn.Module):
 
     def __init__(self, c_in, num_heads=8, kv_pool=10, **kwargs):
         super().__init__()
-        #self.block_r     = _CMMBlock(c_in)
-        #self.block_d     = _CMMBlock(c_in)
-        #self.block_joint = _CMMBlock(c_in * 2)
-        self.block_r     = _CMMBlock(c_in, expand=1)
-        self.block_d     = _CMMBlock(c_in, expand=1)
+        # self.block_r     = _CMMBlock(c_in)
+        # self.block_d     = _CMMBlock(c_in)
+        # self.block_joint = _CMMBlock(c_in * 2)
+        self.block_r = _CMMBlock(c_in, expand=1)
+        self.block_d = _CMMBlock(c_in, expand=1)
         self.block_joint = _CMMBlock(c_in * 2, expand=1)
-        self.gate_proj   = nn.Conv2d(c_in * 2, c_in, 1, bias=False)
-        self.gamma       = nn.Parameter(torch.zeros(1))
+        self.gate_proj = nn.Conv2d(c_in * 2, c_in, 1, bias=False)
+        self.gamma = nn.Parameter(torch.zeros(1))
 
     def forward(self, rgb, depth):
-        y_r  = self.block_r(rgb)                                   # (B, C, H, W)
-        y_d  = self.block_d(depth)                                 # (B, C, H, W)
-        g    = self.gate_proj(
-                   self.block_joint(torch.cat([rgb, depth], dim=1))
-               )                                                    # (B, C, H, W)
+        y_r = self.block_r(rgb)  # (B, C, H, W)
+        y_d = self.block_d(depth)  # (B, C, H, W)
+        g = self.gate_proj(self.block_joint(torch.cat([rgb, depth], dim=1)))  # (B, C, H, W)
         gate = torch.sigmoid(g)
         return rgb + self.gamma * (y_r * gate + y_d * gate)
 
 
 def parse_model(d, ch, verbose=True):
-    """
-    Parse a YOLO model.yaml dictionary into a PyTorch model.
+    """Parse a YOLO model.yaml dictionary into a PyTorch model.
 
     Args:
         d (dict): Model dictionary.
@@ -2747,7 +2683,7 @@ def parse_model(d, ch, verbose=True):
     if scales:
         scale = d.get("scale")
         if not scale:
-            scale = tuple(scales.keys())[0]
+            scale = next(iter(scales.keys()))
             LOGGER.warning(f"no model scale passed. Assuming scale='{scale}'.")
         depth, width, max_channels = scales[scale]
 
@@ -2817,8 +2753,7 @@ def parse_model(d, ch, verbose=True):
             A2C2f,
         }
     )
-    for i, (f, n, m, args) in enumerate(d["backbone"] + d["head"] + d["backboneD"]):  # from, number, module, args 
-        
+    for i, (f, n, m, args) in enumerate(d["backbone"] + d["head"] + d["backboneD"]):  # from, number, module, args
         m = (
             getattr(torch.nn, m[3:])
             if "nn." in m
@@ -2833,7 +2768,7 @@ def parse_model(d, ch, verbose=True):
         n = n_ = max(round(n * depth), 1) if n > 1 else n  # depth gain
         if m in base_modules:
             c1, c2 = ch[f], args[0]
-            if i == 24:#backboneD开始的输入通道应该是1;所以在这里更改
+            if i == 24:  # backboneD开始的输入通道应该是1;所以在这里更改
                 c1 = 3
             if c2 != nc:  # if c2 not equal to number of classes (i.e. for Classify() output)
                 c2 = make_divisible(min(c2, max_channels) * width, 8)
@@ -2879,11 +2814,11 @@ def parse_model(d, ch, verbose=True):
                 # Insert reg_max and end2end before the ch argument
                 # Detect(nc, reg_max, end2end, ch) / Segment(nc, nm, npr, reg_max, end2end, ch)
                 if m is Detect:
-                    args.insert(1, reg_max)   # args = [nc, reg_max, ch] -> insert end2end
-                    args.insert(2, end2end)   # args = [nc, reg_max, end2end, ch]
+                    args.insert(1, reg_max)  # args = [nc, reg_max, ch] -> insert end2end
+                    args.insert(2, end2end)  # args = [nc, reg_max, end2end, ch]
                 elif m is Segment:
-                    args.insert(3, reg_max)   # args = [nc, nm, npr, reg_max, ch]
-                    args.insert(4, end2end)   # args = [nc, nm, npr, reg_max, end2end, ch]
+                    args.insert(3, reg_max)  # args = [nc, nm, npr, reg_max, ch]
+                    args.insert(4, end2end)  # args = [nc, nm, npr, reg_max, end2end, ch]
             if m in {Detect, YOLOEDetect, Segment, YOLOESegment, Pose, OBB}:
                 m.legacy = legacy
         elif m is RTDETRDecoder:  # special case, channels arg must be passed in index 1
@@ -2906,7 +2841,7 @@ def parse_model(d, ch, verbose=True):
         m_.np = sum(x.numel() for x in m_.parameters())  # number params
         m_.i, m_.f, m_.type = i, f, t  # attach index, 'from' index, type
         if verbose:
-            LOGGER.info(f"{i:>3}{str(f):>20}{n_:>3}{m_.np:10.0f}  {t:<45}{str(args):<30}")  # print
+            LOGGER.info(f"{i:>3}{f!s:>20}{n_:>3}{m_.np:10.0f}  {t:<45}{args!s:<30}")  # print
         save.extend(x % i for x in ([f] if isinstance(f, int) else f) if x != -1)  # append to savelist
         layers.append(m_)
         if i == 0:
@@ -2923,57 +2858,61 @@ def parse_model(d, ch, verbose=True):
     # 'old_cmx_ffm' — old YOLOv5 FRM + FFM fusion port
     # 'cmm'       — MambaSOD CMM: self-enhance + joint gate (~1.2M, bidirectional)
     _RGBD_FUSION_CLS = {
-        'se':            RGBDCrossAttention,
-        'mamba':         RGBDMambaFusion,
-        'cross_v1':      RGBDCrossAttentionV1,
-        'cross_v2':      RGBDCrossAttentionV2,
-        'coord_att':     RGBDCoordAtt,
-        'coord_att_v2':  RGBDCoordAttV2,
-        'concat':        RGBDConcatFusion,
-        'add':           RGBDAddFusion,
-        'old_cmx_ffm':   RGBDYOLOv5FRMFFMFusion,
-        'yolov5_frm_ffm': RGBDYOLOv5FRMFFMFusion,
-        'cmm':           RGBDCrossModalMamba,
+        "se": RGBDCrossAttention,
+        "mamba": RGBDMambaFusion,
+        "cross_v1": RGBDCrossAttentionV1,
+        "cross_v2": RGBDCrossAttentionV2,
+        "coord_att": RGBDCoordAtt,
+        "coord_att_v2": RGBDCoordAttV2,
+        "concat": RGBDConcatFusion,
+        "add": RGBDAddFusion,
+        "old_cmx_ffm": RGBDYOLOv5FRMFFMFusion,
+        "yolov5_frm_ffm": RGBDYOLOv5FRMFFMFusion,
+        "cmm": RGBDCrossModalMamba,
     }
-    _fusion_key = d.get('rgbd_fusion', 'se')
+    _fusion_key = d.get("rgbd_fusion", "se")
     _fusion_cls = _RGBD_FUSION_CLS.get(_fusion_key, RGBDCrossAttention)
-    _p3_wavelet_guided = bool(d.get('p3_wavelet_guided', False))
-    _p3_wavelet_hf = bool(d.get('p3_wavelet_HF', False))
-    _p3_wavelet_adaptive = bool(d.get('p3_wavelet_adaptive', False))
-    _p4_wavelet_guided = bool(d.get('p4_wavelet_guided', False))
-    _adaptive_gate = bool(d.get('modality_adaptive_gate', False))
-    _rgbd_reliability_gate = bool(d.get('rgbd_reliability_gate', False))
-    _rgbd_reliability_mode = d.get('rgbd_reliability_mode', 'relative_soft')
-    _rgbd_aux_loss = bool(d.get('rgbd_aux_loss', False))
-    _rgbd_depth_aux_loss = _rgbd_aux_loss and bool(d.get('rgbd_depth_aux_loss', True))
+    _p3_wavelet_guided = bool(d.get("p3_wavelet_guided", False))
+    _p3_wavelet_hf = bool(d.get("p3_wavelet_HF", False))
+    _p3_wavelet_adaptive = bool(d.get("p3_wavelet_adaptive", False))
+    _p4_wavelet_guided = bool(d.get("p4_wavelet_guided", False))
+    _adaptive_gate = bool(d.get("modality_adaptive_gate", False))
+    _rgbd_reliability_gate = bool(d.get("rgbd_reliability_gate", False))
+    _rgbd_reliability_mode = d.get("rgbd_reliability_mode", "relative_soft")
+    _rgbd_aux_loss = bool(d.get("rgbd_aux_loss", False))
+    _rgbd_depth_aux_loss = _rgbd_aux_loss and bool(d.get("rgbd_depth_aux_loss", True))
     _fusion_kw = {}
     if _adaptive_gate:
-        _fusion_kw.update(adaptive_gate=True, gate_mode=d.get('gate_mode', 'channel'))
-    if 'fusion_base_scale' in d:
-        _fusion_kw['base_scale'] = float(d.get('fusion_base_scale'))
-    if 'fusion_out_scale' in d:
-        _fusion_kw['out_scale'] = float(d.get('fusion_out_scale'))
-    if bool(d.get('fusion_learnable_blend', False)):
-        _fusion_kw['learnable_blend'] = True
-        _fusion_kw['blend_init'] = float(d.get('fusion_blend_init', 0.5))
+        _fusion_kw.update(adaptive_gate=True, gate_mode=d.get("gate_mode", "channel"))
+    if "fusion_base_scale" in d:
+        _fusion_kw["base_scale"] = float(d.get("fusion_base_scale"))
+    if "fusion_out_scale" in d:
+        _fusion_kw["out_scale"] = float(d.get("fusion_out_scale"))
+    if bool(d.get("fusion_learnable_blend", False)):
+        _fusion_kw["learnable_blend"] = True
+        _fusion_kw["blend_init"] = float(d.get("fusion_blend_init", 0.5))
     if verbose:
-        LOGGER.info(f"RGB-D fusion mode: '{_fusion_key}' → {_fusion_cls.__name__}"
-                     + (f" (modality adaptive gate)" if _adaptive_gate else ""))
+        LOGGER.info(
+            f"RGB-D fusion mode: '{_fusion_key}' → {_fusion_cls.__name__}"
+            + (" (modality adaptive gate)" if _adaptive_gate else "")
+        )
     ch_p3, ch_p4, ch_p5 = ch[4], ch[6], ch[10]
-    _depth_fpn = bool(d.get('depth_fpn', False))
+    _depth_fpn = bool(d.get("depth_fpn", False))
     if _depth_fpn:
         layers.append(DepthLightFPN(ch_p3, ch_p4, ch_p5))
         if verbose:
             _dfpn = layers[-1]
             LOGGER.info(f"Depth LightFPN enabled ({sum(p.numel() for p in _dfpn.parameters()):,} params)")
     _WAVELET_GUIDED_MAP = {
-        'coord_att':    RGBDWaveletGuidedCoordAtt,
-        'coord_att_v2': RGBDWaveletGuidedCoordAttV2,
+        "coord_att": RGBDWaveletGuidedCoordAtt,
+        "coord_att_v2": RGBDWaveletGuidedCoordAttV2,
     }
     _wavelet_guided_cls = _WAVELET_GUIDED_MAP.get(_fusion_key)
     _p4_fusion_cls = _wavelet_guided_cls if _p4_wavelet_guided and _wavelet_guided_cls else _fusion_cls
     if _p3_wavelet_adaptive:
-        _p3_module = RGBDWaveletAdaptiveFusion(ch_p3, num_heads=8, kv_pool=10, base_fusion_cls=_fusion_cls, **_fusion_kw)
+        _p3_module = RGBDWaveletAdaptiveFusion(
+            ch_p3, num_heads=8, kv_pool=10, base_fusion_cls=_fusion_cls, **_fusion_kw
+        )
     elif _p3_wavelet_hf:
         _p3_module = RGBDWaveletHFFusion(ch_p3, num_heads=8, kv_pool=10, base_fusion_cls=_fusion_cls, **_fusion_kw)
     else:
@@ -2990,22 +2929,18 @@ def parse_model(d, ch, verbose=True):
         layers.append(RGBDRelativeReliabilityGate(ch_p5, mode=_rgbd_reliability_mode))
         if verbose:
             _gate_params = sum(p.numel() for m in layers[-3:] for p in m.parameters())
-            LOGGER.info(
-                f"RGB-D reliability gate enabled: mode={_rgbd_reliability_mode}, "
-                f"{_gate_params:,} params"
-            )
+            LOGGER.info(f"RGB-D reliability gate enabled: mode={_rgbd_reliability_mode}, {_gate_params:,} params")
     if _rgbd_depth_aux_loss:
         layers.append(RGBDDepthAuxHead(ch_p3))
         if verbose:
             _aux_params = sum(p.numel() for p in layers[-1].parameters())
             LOGGER.info(f"RGB-D depth auxiliary foreground head enabled: {_aux_params:,} params")
-    
+
     return torch.nn.Sequential(*layers), sorted(save)
 
 
 def yaml_model_load(path):
-    """
-    Load a YOLOv8 model from a YAML file.
+    """Load a YOLOv8 model from a YAML file.
 
     Args:
         path (str | Path): Path to the YAML file.
@@ -3028,8 +2963,7 @@ def yaml_model_load(path):
 
 
 def guess_model_scale(model_path):
-    """
-    Extract the size character n, s, m, l, or x of the model's scale from the model path.
+    """Extract the size character n, s, m, l, or x of the model's scale from the model path.
 
     Args:
         model_path (str | Path): The path to the YOLO model's YAML file.
@@ -3038,14 +2972,13 @@ def guess_model_scale(model_path):
         (str): The size character of the model's scale (n, s, m, l, or x).
     """
     try:
-        return re.search(r"yolo(e-)?[v]?\d+([nslmx])", Path(model_path).stem).group(2)  # noqa
+        return re.search(r"yolo(e-)?[v]?\d+([nslmx])", Path(model_path).stem).group(2)
     except AttributeError:
         return ""
 
 
 def guess_model_task(model):
-    """
-    Guess the task of a PyTorch model from its architecture or configuration.
+    """Guess the task of a PyTorch model from its architecture or configuration.
 
     Args:
         model (torch.nn.Module | dict): PyTorch model or model configuration in YAML format.

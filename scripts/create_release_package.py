@@ -6,7 +6,6 @@ import hashlib
 import shutil
 from pathlib import Path
 
-
 DEFAULT_ROOT = Path("/workspace/ultralytics-main_for_genye")
 DEFAULT_RELEASE_NAME = "release_rgbd_s8"
 
@@ -142,8 +141,7 @@ def build_release(root: Path, release_name: str) -> Path:
     ensure_inside_root(root, release)
     if release.exists():
         raise FileExistsError(
-            f"Release directory already exists: {release}\n"
-            "Move or remove it before creating a new package."
+            f"Release directory already exists: {release}\nMove or remove it before creating a new package."
         )
     release.mkdir(parents=True)
 
