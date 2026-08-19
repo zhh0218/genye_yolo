@@ -7,6 +7,6 @@ depth_val: depth/val
 depth_test: depth/val
 nc: 3
 names:
-  0: '00'
-  1: '01'
-  2: '10'
+  0: "00"
+  1: "01"
+  2: "10"

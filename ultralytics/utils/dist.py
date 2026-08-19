@@ -10,8 +10,7 @@ from .torch_utils import TORCH_1_9
 
 
 def find_free_network_port() -> int:
-    """
-    Find a free port on localhost.
+    """Find a free port on localhost.
 
     It is useful in single-node training when we don't want to connect to a real main node but have to set the
     `MASTER_PORT` environment variable.
@@ -27,11 +26,10 @@ def find_free_network_port() -> int:
 
 
 def generate_ddp_file(trainer):
-    """
-    Generate a DDP (Distributed Data Parallel) file for multi-GPU training.
+    """Generate a DDP (Distributed Data Parallel) file for multi-GPU training.
 
-    This function creates a temporary Python file that enables distributed training across multiple GPUs.
-    The file contains the necessary configuration to initialize the trainer in a distributed environment.
+    This function creates a temporary Python file that enables distributed training across multiple GPUs. The file
+    contains the necessary configuration to initialize the trainer in a distributed environment.
 
     Args:
         trainer (ultralytics.engine.trainer.BaseTrainer): The trainer containing training configuration and arguments.
@@ -49,15 +47,17 @@ def generate_ddp_file(trainer):
     """
     module, name = f"{trainer.__class__.__module__}.{trainer.__class__.__name__}".rsplit(".", 1)
 
-    import ultralytics as _ult
     import os as _os
+
+    import ultralytics as _ult
+
     _pkg_root = _os.path.dirname(_os.path.dirname(_os.path.abspath(_ult.__file__)))
 
     content = f"""
 # Ultralytics Multi-GPU training temp file (should be automatically deleted after use)
 import sys as _sys
-if {repr(_pkg_root)} not in _sys.path:
-    _sys.path.insert(0, {repr(_pkg_root)})
+if {_pkg_root!r} not in _sys.path:
+    _sys.path.insert(0, {_pkg_root!r})
 
 overrides = {vars(trainer.args)}
 
@@ -85,8 +85,7 @@ if __name__ == "__main__":
 
 
 def generate_ddp_command(world_size: int, trainer):
-    """
-    Generate command for distributed training.
+    """Generate command for distributed training.
 
     Args:
         world_size (int): Number of processes to spawn for distributed training.
@@ -108,11 +107,10 @@ def generate_ddp_command(world_size: int, trainer):
 
 
 def ddp_cleanup(trainer, file):
-    """
-    Delete temporary file if created during distributed data parallel (DDP) training.
+    """Delete temporary file if created during distributed data parallel (DDP) training.
 
-    This function checks if the provided file contains the trainer's ID in its name, indicating it was created
-    as a temporary file for DDP training, and deletes it if so.
+    This function checks if the provided file contains the trainer's ID in its name, indicating it was created as a
+    temporary file for DDP training, and deletes it if so.
 
     Args:
         trainer (ultralytics.engine.trainer.BaseTrainer): The trainer used for distributed training.
