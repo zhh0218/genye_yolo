@@ -5,7 +5,6 @@ import json
 import sys
 from pathlib import Path
 
-
 CONF_SWEEP = [0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80]
 CLASSES = [0, 1]
 MATCH_IOU = 0.50
@@ -100,9 +99,7 @@ def finalize_summary(summary):
     false_rate = fp_images / (gt_images + fp_images) if gt_images + fp_images else 0.0
     presence_precision = hit_images / (hit_images + fp_images) if hit_images + fp_images else 0.0
     image_f1 = (
-        2 * presence_precision * hit_rate / (presence_precision + hit_rate)
-        if presence_precision + hit_rate
-        else 0.0
+        2 * presence_precision * hit_rate / (presence_precision + hit_rate) if presence_precision + hit_rate else 0.0
     )
 
     summary["hit_cls_images"] = hit_images
@@ -112,9 +109,7 @@ def finalize_summary(summary):
     summary["false_rate"] = false_rate
     summary["presence_precision"] = presence_precision
     summary["image_f1"] = image_f1
-    summary["gt_cls_image_error_rate_no_match"] = (
-        summary["gt_cls_no_match_images"] / gt_images if gt_images else 0.0
-    )
+    summary["gt_cls_image_error_rate_no_match"] = summary["gt_cls_no_match_images"] / gt_images if gt_images else 0.0
     summary["gt_cls_image_error_rate_partial_miss"] = (
         summary["gt_cls_partial_miss_images"] / gt_images if gt_images else 0.0
     )
@@ -130,9 +125,7 @@ def build_validator():
         def init_metrics(self, model):
             super().init_metrics(model)
             self.image_error_summary = {
-                f"{conf:.2f}": {
-                    str(cls_id): empty_summary(cls_id, conf, float(self.args.iou)) for cls_id in CLASSES
-                }
+                f"{conf:.2f}": {str(cls_id): empty_summary(cls_id, conf, float(self.args.iou)) for cls_id in CLASSES}
                 for conf in CONF_SWEEP
             }
 

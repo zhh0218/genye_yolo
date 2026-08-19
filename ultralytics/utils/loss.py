@@ -7,8 +7,8 @@ import weakref
 from typing import Any
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+from torch import nn
 
 from ultralytics.utils.metrics import OKS_SIGMA
 from ultralytics.utils.ops import crop_mask, xywh2xyxy, xyxy2xywh
@@ -27,8 +27,7 @@ def _bool_value(value) -> bool:
 
 
 class VarifocalLoss(nn.Module):
-    """
-    Varifocal loss by Zhang et al.
+    """Varifocal loss by Zhang et al.
 
     Implements the Varifocal Loss function for addressing class imbalance in object detection by focusing on
     hard-to-classify examples and balancing positive/negative samples.
@@ -60,11 +59,10 @@ class VarifocalLoss(nn.Module):
 
 
 class FocalLoss(nn.Module):
-    """
-    Wraps focal loss around existing loss_fcn(), i.e. criteria = FocalLoss(nn.BCEWithLogitsLoss(), gamma=1.5).
+    """Wraps focal loss around existing loss_fcn(), i.e. criteria = FocalLoss(nn.BCEWithLogitsLoss(), gamma=1.5).
 
-    Implements the Focal Loss function for addressing class imbalance by down-weighting easy examples and focusing
-    on hard negatives during training.
+    Implements the Focal Loss function for addressing class imbalance by down-weighting easy examples and focusing on
+    hard negatives during training.
 
     Attributes:
         gamma (float): The focusing parameter that controls how much the loss focuses on hard-to-classify examples.
@@ -225,23 +223,33 @@ class KeypointLoss(nn.Module):
 class v8DetectionLoss:
     """Criterion class for computing training losses for YOLOv8 object detection."""
 
-    def __init__(self, model, tal_topk: int = 10, tal_topk2: int = None, stal: bool = False):  # model must be de-paralleled
+    def __init__(
+        self, model, tal_topk: int = 10, tal_topk2: int | None = None, stal: bool = False
+    ):  # model must be de-paralleled
         """Initialize v8DetectionLoss with model parameters and task-aligned assignment settings."""
         device = next(model.parameters()).device  # get model device
         h = model.args  # hyperparameters
         y = getattr(model, "yaml", {})
 
-        #m = model.model[-1]  # Detect() module
+        # m = model.model[-1]  # Detect() module
         m = model.model[23]  # Detect() module
         self.bce = nn.BCEWithLogitsLoss(reduction="none")
         self.model = weakref.proxy(model)
         self.hyp = h
-        self.cls01_weight = float(getattr(h, "cls01_weight", getattr(model, "yaml", {}).get("cls01_weight", 1.0)) or 1.0)
+        self.cls01_weight = float(
+            getattr(h, "cls01_weight", getattr(model, "yaml", {}).get("cls01_weight", 1.0)) or 1.0
+        )
         self.ol_iou = _bool_value(getattr(h, "ol_iou", getattr(model, "yaml", {}).get("ol_iou", False)))
-        self.ol_iou_weight = float(getattr(h, "ol_iou_weight", getattr(model, "yaml", {}).get("ol_iou_weight", 0.0)) or 0.0)
+        self.ol_iou_weight = float(
+            getattr(h, "ol_iou_weight", getattr(model, "yaml", {}).get("ol_iou_weight", 0.0)) or 0.0
+        )
         self.rgbd_aux_loss = _bool_value(getattr(h, "rgbd_aux_loss", y.get("rgbd_aux_loss", False)))
-        self.rgbd_gate_loss = self.rgbd_aux_loss and _bool_value(getattr(h, "rgbd_gate_loss", y.get("rgbd_gate_loss", True)))
-        self.rgbd_gate_loss_weight = float(getattr(h, "rgbd_gate_loss_weight", y.get("rgbd_gate_loss_weight", 0.1)) or 0.0)
+        self.rgbd_gate_loss = self.rgbd_aux_loss and _bool_value(
+            getattr(h, "rgbd_gate_loss", y.get("rgbd_gate_loss", True))
+        )
+        self.rgbd_gate_loss_weight = float(
+            getattr(h, "rgbd_gate_loss_weight", y.get("rgbd_gate_loss_weight", 0.1)) or 0.0
+        )
         self.rgbd_depth_aux_loss = self.rgbd_aux_loss and _bool_value(
             getattr(h, "rgbd_depth_aux_loss", y.get("rgbd_depth_aux_loss", True))
         )
@@ -280,7 +288,11 @@ class v8DetectionLoss:
         self.proj = torch.arange(m.reg_max, dtype=torch.float, device=device)
 
     def _classification_loss(
-        self, pred_scores: torch.Tensor, target_scores: torch.Tensor, dtype: torch.dtype, target_scores_sum: torch.Tensor
+        self,
+        pred_scores: torch.Tensor,
+        target_scores: torch.Tensor,
+        dtype: torch.dtype,
+        target_scores_sum: torch.Tensor,
     ) -> torch.Tensor:
         """Compute BCE classification loss, optionally up-weighting positive class-1 targets."""
         target_scores = target_scores.to(dtype)
@@ -377,7 +389,9 @@ class v8DetectionLoss:
 class v8SegmentationLoss(v8DetectionLoss):
     """Criterion class for computing training losses for YOLOv8 segmentation."""
 
-    def __init__(self, model, tal_topk: int = 10, tal_topk2: int = None, stal: bool = False):  # model must be de-paralleled
+    def __init__(
+        self, model, tal_topk: int = 10, tal_topk2: int | None = None, stal: bool = False
+    ):  # model must be de-paralleled
         """Initialize the v8SegmentationLoss class with model parameters and mask overlap setting."""
         super().__init__(model, tal_topk, tal_topk2, stal)
         self.overlap = model.args.overlap_mask
@@ -559,8 +573,7 @@ class v8SegmentationLoss(v8DetectionLoss):
     def single_mask_loss(
         gt_mask: torch.Tensor, pred: torch.Tensor, proto: torch.Tensor, xyxy: torch.Tensor, area: torch.Tensor
     ) -> torch.Tensor:
-        """
-        Compute the instance segmentation loss for a single image.
+        """Compute the instance segmentation loss for a single image.
 
         Args:
             gt_mask (torch.Tensor): Ground truth mask of shape (N, H, W), where N is the number of objects.
@@ -592,8 +605,7 @@ class v8SegmentationLoss(v8DetectionLoss):
         imgsz: torch.Tensor,
         overlap: bool,
     ) -> torch.Tensor:
-        """
-        Calculate the loss for instance segmentation.
+        """Calculate the loss for instance segmentation.
 
         Args:
             fg_mask (torch.Tensor): A binary tensor of shape (BS, N_anchors) indicating which anchors are positive.
@@ -745,8 +757,7 @@ class v8PoseLoss(v8DetectionLoss):
         target_bboxes: torch.Tensor,
         pred_kpts: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        """
-        Calculate the keypoints loss for the model.
+        """Calculate the keypoints loss for the model.
 
         This function calculates the keypoints loss and keypoints object loss for a given batch. The keypoints loss is
         based on the difference between the predicted keypoints and ground truth keypoints. The keypoints object loss is
@@ -920,8 +931,7 @@ class v8OBBLoss(v8DetectionLoss):
     def bbox_decode(
         self, anchor_points: torch.Tensor, pred_dist: torch.Tensor, pred_angle: torch.Tensor
     ) -> torch.Tensor:
-        """
-        Decode predicted object bounding box coordinates from anchor points and distribution.
+        """Decode predicted object bounding box coordinates from anchor points and distribution.
 
         Args:
             anchor_points (torch.Tensor): Anchor points, (h*w, 2).

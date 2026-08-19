@@ -34,15 +34,15 @@ YOLO11-seg-RGBD-CoordAttV2-P3Wavelet-DepthFPN
 
 核心结果：
 
-| 指标 | 数值 |
-|---|---:|
-| best Mask mAP50-95 | 0.80303 |
-| final best.pt 验证 Mask mAP50-95 | 0.79863 |
-| final best.pt 验证 Mask mAP50 | 0.91975 |
-| final best.pt 验证 Box mAP50-95 | 0.82339 |
-| 类别 1 Mask mAP50-95 | 0.66651 |
-| 参数量 | 约 17.29M |
-| 计算量 | 约 54.3 GFLOPs |
+| 指标                             |           数值 |
+| -------------------------------- | -------------: |
+| best Mask mAP50-95               |        0.80303 |
+| final best.pt 验证 Mask mAP50-95 |        0.79863 |
+| final best.pt 验证 Mask mAP50    |        0.91975 |
+| final best.pt 验证 Box mAP50-95  |        0.82339 |
+| 类别 1 Mask mAP50-95             |        0.66651 |
+| 参数量                           |      约 17.29M |
+| 计算量                           | 约 54.3 GFLOPs |
 
 重要文件：
 
@@ -206,7 +206,7 @@ tail -f LOG/new_train.log
 ```bash
 cd /workspace/ultralytics-main_for_genye
 conda activate yolo26
-python - <<'PY'
+python - << 'PY'
 from ultralytics import YOLO
 
 model = YOLO("/workspace/ultralytics-main_for_genye/YOLOv11-RGB-D-coord_attv2-genye/coord_attv2-s8/weights/best.pt")
@@ -267,7 +267,7 @@ ultralytics/cfg/models/11/yolo11-seg.yaml
 重点看：
 
 ```yaml
-rgbd_fusion: 'coord_att_v2'
+rgbd_fusion: "coord_att_v2"
 p3_wavelet_guided: True
 depth_fpn: True
 backbone:
@@ -352,19 +352,19 @@ ultralytics/models/yolo/segment/val.py
 
 当前建议给新同学重点理解三组：
 
-| run | 结构 | 结论 |
-|---|---|---|
-| `coord_attv2-s3` | CoordAttV2 + P3 wavelet | 旧主版本 |
-| `coord_attv2-s7` | just CoordAttV2 | 更轻，效果接近 |
+| run              | 结构                                | 结论               |
+| ---------------- | ----------------------------------- | ------------------ |
+| `coord_attv2-s3` | CoordAttV2 + P3 wavelet             | 旧主版本           |
+| `coord_attv2-s7` | just CoordAttV2                     | 更轻，效果接近     |
 | `coord_attv2-s8` | CoordAttV2 + P3 wavelet + Depth FPN | 当前最强，推荐交付 |
 
 三组结果对比：
 
-| run | best Mask mAP50-95 | final best.pt Mask mAP50-95 | final best.pt Box mAP50-95 |
-|---|---:|---:|---:|
-| `s3` | 0.79678 | 0.79603 | 0.82316 |
-| `s7` | 0.79749 | 0.79475 | 0.82420 |
-| `s8` | 0.80303 | 0.79863 | 0.82339 |
+| run  | best Mask mAP50-95 | final best.pt Mask mAP50-95 | final best.pt Box mAP50-95 |
+| ---- | -----------------: | --------------------------: | -------------------------: |
+| `s3` |            0.79678 |                     0.79603 |                    0.82316 |
+| `s7` |            0.79749 |                     0.79475 |                    0.82420 |
+| `s8` |            0.80303 |                     0.79863 |                    0.82339 |
 
 结论：如果优先追求分割精度，使用 `s8/best.pt`。如果部署速度压力很大，可以把 `s7/best.pt` 作为轻量备选。
 
@@ -421,13 +421,13 @@ reg_max: 1
 可以降低 batch：
 
 ```python
-batch=16
+batch = 16
 ```
 
 或者减少 GPU 数量：
 
 ```python
-device="0"
+device = "0"
 ```
 
 ### 10.5 best.pt 和 last.pt 用哪个
