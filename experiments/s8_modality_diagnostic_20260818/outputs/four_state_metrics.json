@@ -8,11 +8,7 @@
   "workers": 0,
   "conf": 0.001,
   "iou": 0.7,
-  "fusion_indices": [
-    36,
-    37,
-    38
-  ],
+  "fusion_indices": [36, 37, 38],
   "modes": {
     "RD": {
       "mode": "RD",

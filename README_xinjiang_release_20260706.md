@@ -102,10 +102,10 @@ configs/yolo11-seg-spatialillum-learnblend-auxoff-xinjiang1500.yaml
 关键开关：
 
 ```yaml
-rgbd_fusion: 'coord_att_v2'
+rgbd_fusion: "coord_att_v2"
 depth_fpn: True
 modality_adaptive_gate: True
-gate_mode: 'spatial_illum'
+gate_mode: "spatial_illum"
 fusion_learnable_blend: True
 fusion_blend_init: 0.5
 rgbd_aux_loss: False
