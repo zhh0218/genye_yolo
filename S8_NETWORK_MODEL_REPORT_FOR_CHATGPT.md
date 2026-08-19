@@ -84,10 +84,10 @@ Mask mAP50-95  = 0.80208
 S8 的核心开关位于 `ultralytics/cfg/models/11/yolo11-seg.yaml`：
 
 ```yaml
-scale: 's'
+scale: "s"
 end2end: False
 reg_max: 1
-rgbd_fusion: 'coord_att_v2'
+rgbd_fusion: "coord_att_v2"
 p3_wavelet_guided: True
 p3_wavelet_HF: False
 p3_wavelet_adaptive: False
@@ -667,4 +667,3 @@ Depth -> Depth backbone -> DepthLightFPN ---┤
 ## 16. 面向论文/报告的简洁表述
 
 S8 模型在 YOLO11-seg 的基础上构建 RGB-D 双分支实例分割框架。RGB 图像和深度图分别输入两个结构同构的 backbone，提取 P3、P4、P5 三个尺度的特征。为增强深度分支的多尺度语义表达，模型在融合前引入轻量级 top-down Depth FPN，将 P5 语义逐级传递至 P4 和 P3。随后，模型在三个尺度进行 RGB-D 特征融合，其中 P4 和 P5 采用 CoordAttV2 融合模块，P3 采用 Haar wavelet 引导的 CoordAttV2 模块，以利用深度图高频分量增强小目标边界和局部结构。融合后的 P3、P4、P5 特征输入 YOLO11-seg 的分割头，最终输出目标检测框、类别和实例掩码。
-

@@ -29,21 +29,21 @@ experiments/spatial_gate_infer_validate_20260725-114839
 
 主要脚本：
 
-| 文件 | 作用 |
-| --- | --- |
-| `infer_validate_spatial_gate.py` | 加载模型和 RGB-D 数据，在推理过程中抓取每个 `CoordAttV2` 模块的 `_last_alpha`，导出 RGB/Depth 权重 CSV |
-| `summarize_gate_effect.py` | 按 normal / overexposed 图像分组，统计各层 `alpha`、Depth 权重、亮度、过曝像素比例及相关性 |
-| `analyze_local_overexposure_gate.py` | 根据亮度阈值自动生成局部过曝 mask，比较 mask 内外的 RGB/Depth 权重 |
-| `analyze_labeled_exposure_gate.py` | 使用 `candidate_instance_manifest.csv` 中 selected=1 的实例标注，比较同一包裹在 normal 与 `_realexp` 版本中的 gate 变化 |
+| 文件                                 | 作用                                                                                                                    |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `infer_validate_spatial_gate.py`     | 加载模型和 RGB-D 数据，在推理过程中抓取每个 `CoordAttV2` 模块的 `_last_alpha`，导出 RGB/Depth 权重 CSV                  |
+| `summarize_gate_effect.py`           | 按 normal / overexposed 图像分组，统计各层 `alpha`、Depth 权重、亮度、过曝像素比例及相关性                              |
+| `analyze_local_overexposure_gate.py` | 根据亮度阈值自动生成局部过曝 mask，比较 mask 内外的 RGB/Depth 权重                                                      |
+| `analyze_labeled_exposure_gate.py`   | 使用 `candidate_instance_manifest.csv` 中 selected=1 的实例标注，比较同一包裹在 normal 与 `_realexp` 版本中的 gate 变化 |
 
 输出文件：
 
-| 文件 | 内容 |
-| --- | --- |
-| `outputs/spatial_gate_rgb_depth_weights.csv` | 每张图、每个融合层的 `alpha` / Depth 权重统计 |
-| `outputs/spatial_gate_summary_by_group.json` | normal 与 overexposed 分组统计 |
-| `outputs/local_overexposure_gate_summary.json` | 局部高亮区域内外的 gate 统计 |
-| `outputs/labeled_exposure_gate_summary.json` | 标注包裹区域的成对 normal vs realexp 统计 |
+| 文件                                           | 内容                                          |
+| ---------------------------------------------- | --------------------------------------------- |
+| `outputs/spatial_gate_rgb_depth_weights.csv`   | 每张图、每个融合层的 `alpha` / Depth 权重统计 |
+| `outputs/spatial_gate_summary_by_group.json`   | normal 与 overexposed 分组统计                |
+| `outputs/local_overexposure_gate_summary.json` | 局部高亮区域内外的 gate 统计                  |
+| `outputs/labeled_exposure_gate_summary.json`   | 标注包裹区域的成对 normal vs realexp 统计     |
 
 ## 3. 使用的模型和数据
 
@@ -56,9 +56,9 @@ configs/yolo11-seg-spatialillum-learnblend-auxoff-xinjiang1500.yaml
 关键配置：
 
 ```yaml
-rgbd_fusion: 'coord_att_v2'
+rgbd_fusion: "coord_att_v2"
 modality_adaptive_gate: True
-gate_mode: 'spatial_illum'
+gate_mode: "spatial_illum"
 fusion_learnable_blend: True
 rgbd_aux_loss: False
 rgbd_gate_loss: False
@@ -197,19 +197,19 @@ selected_depth_delta = -selected_src_delta
 
 整图平均层面，overexposed 图像的过曝像素比例从 0.0245 增加到 0.0403，但三层 `alpha` 的平均变化都很小：
 
-| 模块 | normal alpha | overexposed alpha | alpha 差值 | Depth 权重差值 |
-| --- | ---: | ---: | ---: | ---: |
-| model.36 | 0.9687 | 0.9698 | +0.0012 | -0.0012 |
-| model.37 | 0.8557 | 0.8577 | +0.0020 | -0.0020 |
-| model.38 | 0.7071 | 0.7082 | +0.0011 | -0.0011 |
+| 模块     | normal alpha | overexposed alpha | alpha 差值 | Depth 权重差值 |
+| -------- | -----------: | ----------------: | ---------: | -------------: |
+| model.36 |       0.9687 |            0.9698 |    +0.0012 |        -0.0012 |
+| model.37 |       0.8557 |            0.8577 |    +0.0020 |        -0.0020 |
+| model.38 |       0.7071 |            0.7082 |    +0.0011 |        -0.0011 |
 
 成对图像统计中，只有 `model.38` 的平均变化略微符合预期：
 
-| 模块 | 成对 alpha 差值均值 | Depth 差值均值 | Depth 增加比例 |
-| --- | ---: | ---: | ---: |
-| model.36 | +0.00075 | -0.00075 | 0.8% |
-| model.37 | +0.00072 | -0.00072 | 13.8% |
-| model.38 | -0.00026 | +0.00026 | 50.6% |
+| 模块     | 成对 alpha 差值均值 | Depth 差值均值 | Depth 增加比例 |
+| -------- | ------------------: | -------------: | -------------: |
+| model.36 |            +0.00075 |       -0.00075 |           0.8% |
+| model.37 |            +0.00072 |       -0.00072 |          13.8% |
+| model.38 |            -0.00026 |       +0.00026 |          50.6% |
 
 结论：整图平均不适合证明 `spatial_illum` 有效。因为过曝通常是局部现象，整图平均会把局部响应稀释掉。
 
@@ -217,14 +217,14 @@ selected_depth_delta = -selected_src_delta
 
 局部阈值 mask 分析显示，高亮区域内部的 `alpha` 普遍低于外部，即 RGB 权重下降、Depth 权重上升。
 
-| 模块 / 分组 | 样本数 | mask 比例均值 | mask 内 alpha - mask 外 alpha | Depth 权重差值 | alpha 降低比例 |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| model.36 / normal | 235 | 0.0166 | -0.0355 | +0.0355 | 97.4% |
-| model.37 / normal | 172 | 0.0159 | -0.0252 | +0.0252 | 64.0% |
-| model.38 / normal | 114 | 0.0147 | -0.0839 | +0.0839 | 75.4% |
-| model.36 / overexposed | 243 | 0.0255 | -0.0213 | +0.0213 | 94.7% |
-| model.37 / overexposed | 222 | 0.0224 | -0.0213 | +0.0213 | 63.1% |
-| model.38 / overexposed | 183 | 0.0184 | -0.1080 | +0.1080 | 84.7% |
+| 模块 / 分组            | 样本数 | mask 比例均值 | mask 内 alpha - mask 外 alpha | Depth 权重差值 | alpha 降低比例 |
+| ---------------------- | -----: | ------------: | ----------------------------: | -------------: | -------------: |
+| model.36 / normal      |    235 |        0.0166 |                       -0.0355 |        +0.0355 |          97.4% |
+| model.37 / normal      |    172 |        0.0159 |                       -0.0252 |        +0.0252 |          64.0% |
+| model.38 / normal      |    114 |        0.0147 |                       -0.0839 |        +0.0839 |          75.4% |
+| model.36 / overexposed |    243 |        0.0255 |                       -0.0213 |        +0.0213 |          94.7% |
+| model.37 / overexposed |    222 |        0.0224 |                       -0.0213 |        +0.0213 |          63.1% |
+| model.38 / overexposed |    183 |        0.0184 |                       -0.1080 |        +0.1080 |          84.7% |
 
 这是最能支持 `spatial_illum` 有效的结果。尤其是 `model.38.coord_att`，在高亮区域内的 RGB 权重下降最大，Depth 权重平均增加约 0.108。
 
@@ -237,19 +237,19 @@ selected_depth_delta = -selected_src_delta
 
 结果如下：
 
-| 模块 | selected alpha 差值 | 95% CI | selected Depth 差值 | 符合“Depth 增加”的比例 |
-| --- | ---: | ---: | ---: | ---: |
-| model.36 | +0.0188 | [0.0167, 0.0210] | -0.0188 | 6.5% |
-| model.37 | +0.0111 | [0.0080, 0.0143] | -0.0111 | 29.1% |
-| model.38 | -0.0191 | [-0.0242, -0.0139] | +0.0191 | 71.7% |
+| 模块     | selected alpha 差值 |             95% CI | selected Depth 差值 | 符合“Depth 增加”的比例 |
+| -------- | ------------------: | -----------------: | ------------------: | ---------------------: |
+| model.36 |             +0.0188 |   [0.0167, 0.0210] |             -0.0188 |                   6.5% |
+| model.37 |             +0.0111 |   [0.0080, 0.0143] |             -0.0111 |                  29.1% |
+| model.38 |             -0.0191 | [-0.0242, -0.0139] |             +0.0191 |                  71.7% |
 
 差分中的差分结果也类似：
 
-| 模块 | selected 相对 background 的 alpha 变化 | 结论 |
-| --- | ---: | --- |
-| model.36 | +0.0187 | 与预期相反，过曝后 selected 区域更依赖 RGB |
-| model.37 | +0.0108 | 与预期相反，但幅度小于 model.36 |
-| model.38 | -0.0193 | 符合预期，过曝 selected 区域更依赖 Depth |
+| 模块     | selected 相对 background 的 alpha 变化 | 结论                                       |
+| -------- | -------------------------------------: | ------------------------------------------ |
+| model.36 |                                +0.0187 | 与预期相反，过曝后 selected 区域更依赖 RGB |
+| model.37 |                                +0.0108 | 与预期相反，但幅度小于 model.36            |
+| model.38 |                                -0.0193 | 符合预期，过曝 selected 区域更依赖 Depth   |
 
 结论：在语义包裹实例层面，`model.38.coord_att` 明确表现出预期效果；`model.36` 和 `model.37` 没有表现出预期的过曝抑制，甚至方向相反。
 
@@ -281,12 +281,12 @@ spatial_illum 对局部过曝区域的模态权重调节是有用的，尤其在
 
 为了更有力地证明模块是否提升最终效果，建议补做以下实验：
 
-| 实验组 | gate 配置 | 目的 |
-| --- | --- | --- |
-| Baseline | `modality_adaptive_gate=False` | 不使用自适应 RGB-D gate |
-| Spatial | `modality_adaptive_gate=True`, `gate_mode='spatial'` | 只使用空间 gate，不输入亮度/对比度先验 |
-| Spatial Illum | `modality_adaptive_gate=True`, `gate_mode='spatial_illum'` | 当前方法 |
-| Spatial Illum + Gate Loss | `gate_mode='spatial_illum'`, `rgbd_gate_loss=True` | 验证显式 gate 监督是否能纠正 P3/P4 的反向现象 |
+| 实验组                    | gate 配置                                                  | 目的                                          |
+| ------------------------- | ---------------------------------------------------------- | --------------------------------------------- |
+| Baseline                  | `modality_adaptive_gate=False`                             | 不使用自适应 RGB-D gate                       |
+| Spatial                   | `modality_adaptive_gate=True`, `gate_mode='spatial'`       | 只使用空间 gate，不输入亮度/对比度先验        |
+| Spatial Illum             | `modality_adaptive_gate=True`, `gate_mode='spatial_illum'` | 当前方法                                      |
+| Spatial Illum + Gate Loss | `gate_mode='spatial_illum'`, `rgbd_gate_loss=True`         | 验证显式 gate 监督是否能纠正 P3/P4 的反向现象 |
 
 所有实验应保持：
 
