@@ -21,10 +21,12 @@
 ### Task 1: Create and validate the editable DepthLightFPN diagram
 
 **Files:**
+
 - Create: `DepthLightFPN.drawio`
 - Reference: `docs/superpowers/specs/2026-08-13-depthlightfpn-drawio-design.md`
 
 **Interfaces:**
+
 - Consumes: the approved node labels, dimensions, operator sequence, and visual language from the design specification.
 - Produces: one diagrams.net document whose diagram contains native `mxCell` vertices and edges.
 
