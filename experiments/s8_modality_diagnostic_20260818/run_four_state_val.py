@@ -7,8 +7,8 @@ import types
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-from ultralytics import YOLO
 
+from ultralytics import YOLO
 
 MODES = {
     "RD": (1.0, 1.0),
@@ -34,7 +34,7 @@ def _install_feature_mute(yolo: YOLO) -> list[int]:
     base_model = yolo.model
     _backfill_old_checkpoint_attrs(base_model)
     if not hasattr(base_model, "_fusion_indices"):
-        ds, de = base_model._depth_range
+        _ds, de = base_model._depth_range
         fusion_start = de + (1 if bool(getattr(base_model, "depth_fpn", False)) else 0)
         base_model._fusion_indices = [fusion_start + i for i in range(3)]
 
@@ -166,7 +166,9 @@ def main() -> None:
     root = _repo_root()
     exp_dir = Path(__file__).resolve().parent
     parser = argparse.ArgumentParser()
-    parser.add_argument("--weights", default=str(root / "YOLOv11-RGB-D-coord_attv2-genye/coord_attv2-s8/weights/best.pt"))
+    parser.add_argument(
+        "--weights", default=str(root / "YOLOv11-RGB-D-coord_attv2-genye/coord_attv2-s8/weights/best.pt")
+    )
     parser.add_argument("--data", default=str(exp_dir / "data_3cls_local.yaml"))
     parser.add_argument("--imgsz", type=int, default=640)
     parser.add_argument("--batch", type=int, default=8)
@@ -229,7 +231,9 @@ def main() -> None:
         "modes": results,
         "shapley": shapley_rows,
     }
-    (out_dir / "four_state_metrics.json").write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    (out_dir / "four_state_metrics.json").write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
     _write_csv(out_dir / "four_state_metrics.csv", mode_rows)
     _write_csv(out_dir / "shapley_metrics.csv", shapley_rows)
     _plot_mode_bars(results, out_dir)

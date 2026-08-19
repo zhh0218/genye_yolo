@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Evaluate YOLOv11s full fine-tune and Conv-LoRA variants on test_fixed.
 
 This script is intended to run on the Linux training server.
@@ -14,15 +13,13 @@ import json
 import sys
 from pathlib import Path
 
-
 REPO = Path("/workspace/ultralytics-main_for_genye")
 DATA = Path("/workspace/Datasets/genye_ft_splits_seed20260526_v2/yolo11/test_fixed.yaml")
 PROJECT = REPO / "YOLOv11-RGB-D-coord_attv2-genye/finetune_genye_lora/eval_test_fixed_lora_sweep_official"
 OUT_DIR = REPO / "YOLOv11-RGB-D-coord_attv2-genye/finetune_genye_lora/eval_test_fixed_lora_sweep_summary"
 
 VARIANTS = {
-    "full_ft1000": REPO
-    / "YOLOv11-RGB-D-coord_attv2-genye/finetune_genye/genye_ft1000_yolo11s/weights/best.pt",
+    "full_ft1000": REPO / "YOLOv11-RGB-D-coord_attv2-genye/finetune_genye/genye_ft1000_yolo11s/weights/best.pt",
     "lora_r8": REPO
     / "YOLOv11-RGB-D-coord_attv2-genye/finetune_genye_lora/genye_ft1000_yolo11s_conv_lora_r8/weights/best.pt",
     "lora_r16": REPO
@@ -46,7 +43,7 @@ def scalar(x):
 def class_rows(metrics, variant: str, weight: Path, save_dir: Path) -> list[dict]:
     rows: list[dict] = []
     names = getattr(metrics, "names", None) or {0: "0", 1: "1"}
-    for cls_idx in sorted(int(k) for k in names.keys()):
+    for cls_idx in sorted(int(k) for k in names):
         try:
             values = metrics.class_result(cls_idx)
         except Exception:

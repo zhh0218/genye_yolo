@@ -6,19 +6,19 @@
 
 # Parameters
 nc: 80 # number of classes
-scale: 's' # model scale: n/s/m/l/x
+scale: "s" # model scale: n/s/m/l/x
 end2end: False # enable end-to-end NMS-free detection
 reg_max: 1 # DFL bins (1 = disable DFL, direct bbox regression)
-rgbd_fusion: 'coord_att_v2' # RGB-D fusion mode: 'se' | 'mamba' | 'cross_v1' | 'cross_v2' | 'coord_att' | 'coord_att_v2' | cmm
+rgbd_fusion: "coord_att_v2" # RGB-D fusion mode: 'se' | 'mamba' | 'cross_v1' | 'cross_v2' | 'coord_att' | 'coord_att_v2' | cmm
 p3_wavelet_guided: True
 p3_wavelet_HF: False
 p3_wavelet_adaptive: False # adaptive LF+HF blend (supersedes p3_wavelet_HF)
 p4_wavelet_guided: False
 depth_fpn: True # lightweight top-down FPN for depth branch before fusion
 modality_adaptive_gate: True # GATED-FULL: enable region gate
-gate_mode: 'spatial_channel' # spatial_channel region gate (ported from ultralytics-main)
+gate_mode: "spatial_channel" # spatial_channel region gate (ported from ultralytics-main)
 rgbd_reliability_gate: False # relative RGB-D reliability gate before fusion; False keeps the original S8 path
-rgbd_reliability_mode: 'relative_soft' # soft feature scaling from RGB/depth relative reliability
+rgbd_reliability_mode: "relative_soft" # soft feature scaling from RGB/depth relative reliability
 cls01_weight: 1.0 # positive class-1 classification loss weight; 1.0 keeps the original loss
 ol_iou: False # enable overlap-shape IoU penalty in box loss; False keeps the original CIoU loss
 ol_iou_weight: 0.0 # OL-IoU penalty weight; used only when ol_iou=True
@@ -67,7 +67,7 @@ head:
   - [-1, 2, C3k2, [1024, True]] # 22 (P5/32-large)
 
   - [[16, 19, 22], 1, Segment, [nc, 32, 256]] # Detect(P3, P4, P5)
-  
+
 backboneD:
   # [from, repeats, module, args]
   - [-1, 1, Conv, [64, 3, 2]] # 0-P1/2
