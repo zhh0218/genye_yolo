@@ -102,7 +102,7 @@ conda activate yolo26
 检查 Python 和 PyTorch：
 
 ```bash
-python - <<'PY'
+python - << 'PY'
 import torch
 print("torch:", torch.__version__)
 print("cuda available:", torch.cuda.is_available())
@@ -128,7 +128,7 @@ Ultralytics 8.3.195
 
 ```bash
 cd /workspace/ultralytics-main_for_genye
-python - <<'PY'
+python - << 'PY'
 import ultralytics
 import ultralytics.nn.tasks as tasks
 print("ultralytics path:", ultralytics.__file__)
@@ -158,6 +158,7 @@ has RGBDCoordAttV2: True
 ```python
 import sys
 from pathlib import Path
+
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 ```
@@ -274,7 +275,7 @@ python examples/quick_start/quick_train.py
 ```bash
 cd /workspace/ultralytics-main_for_genye
 conda activate yolo26
-python - <<'PY'
+python - << 'PY'
 from ultralytics import YOLO
 
 model = YOLO("/workspace/ultralytics-main_for_genye/YOLOv11-RGB-D-coord_attv2-genye/coord_attv2-s8/weights/best.pt")
@@ -323,8 +324,8 @@ test: /workspace/Datasets/final/images/test
 
 nc: 2
 names:
-  0: 00
-  1: 01
+    0: 00
+    1: 01
 ```
 
 注意：depth 路径没有显式写在 YAML 中，而是自动推断：
@@ -347,17 +348,17 @@ labels/train/xxx.txt
 
 新同学至少要知道以下文件作用：
 
-| 文件 | 作用 |
-|---|---|
-| `train_genye.py` | 训练入口、超参数、权重加载 |
-| `data-ubuntu-genye.yaml` | 数据路径和类别定义 |
-| `ultralytics/cfg/models/11/yolo11-seg.yaml` | 模型结构和融合开关 |
-| `ultralytics/nn/tasks.py` | RGB-D 前向、CoordAttV2、wavelet、Depth FPN |
-| `ultralytics/data/build.py` | 自动选择 `YOLORGBDDataset` |
-| `ultralytics/data/dataset.py` | RGB-depth 配对和读取 |
-| `ultralytics/data/augment.py` | RGB-depth 同步增强 |
-| `ultralytics/models/yolo/detect/train.py` | 训练时 depth 归一化 |
-| `ultralytics/models/yolo/detect/val.py` | 验证时 depth 归一化 |
+| 文件                                        | 作用                                       |
+| ------------------------------------------- | ------------------------------------------ |
+| `train_genye.py`                            | 训练入口、超参数、权重加载                 |
+| `data-ubuntu-genye.yaml`                    | 数据路径和类别定义                         |
+| `ultralytics/cfg/models/11/yolo11-seg.yaml` | 模型结构和融合开关                         |
+| `ultralytics/nn/tasks.py`                   | RGB-D 前向、CoordAttV2、wavelet、Depth FPN |
+| `ultralytics/data/build.py`                 | 自动选择 `YOLORGBDDataset`                 |
+| `ultralytics/data/dataset.py`               | RGB-depth 配对和读取                       |
+| `ultralytics/data/augment.py`               | RGB-depth 同步增强                         |
+| `ultralytics/models/yolo/detect/train.py`   | 训练时 depth 归一化                        |
+| `ultralytics/models/yolo/detect/val.py`     | 验证时 depth 归一化                        |
 
 详细说明见：
 

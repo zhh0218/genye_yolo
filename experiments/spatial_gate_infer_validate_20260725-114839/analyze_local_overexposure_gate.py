@@ -13,7 +13,6 @@ import torch
 
 from ultralytics import YOLO
 
-
 ROOT = Path(__file__).resolve().parents[2]
 EXP_DIR = Path(__file__).resolve().parent
 DEFAULT_DATASET = ROOT / "Dataset" / "xinjiang_1500_baoguang"
@@ -30,7 +29,9 @@ DEFAULT_OUT = EXP_DIR / "outputs"
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Analyze spatial gate weights inside/outside local overexposed regions.")
+    parser = argparse.ArgumentParser(
+        description="Analyze spatial gate weights inside/outside local overexposed regions."
+    )
     parser.add_argument("--dataset", type=Path, default=DEFAULT_DATASET)
     parser.add_argument("--model-yaml", type=Path, default=DEFAULT_MODEL_YAML)
     parser.add_argument("--weights", type=Path, default=DEFAULT_WEIGHTS)
@@ -63,7 +64,7 @@ def image_depth_pairs(dataset: Path, split: str) -> list[tuple[Path, Path]]:
 def letterbox(im: np.ndarray, size: int = 640, value: int = 114) -> np.ndarray:
     h, w = im.shape[:2]
     scale = min(size / h, size / w)
-    nh, nw = int(round(h * scale)), int(round(w * scale))
+    nh, nw = round(h * scale), round(w * scale)
     resized = cv2.resize(im, (nw, nh), interpolation=cv2.INTER_LINEAR)
     top = (size - nh) // 2
     bottom = size - nh - top
@@ -81,7 +82,9 @@ def to_tensor_bchw(im: np.ndarray, device: torch.device) -> torch.Tensor:
     return torch.from_numpy(np.ascontiguousarray(im)).unsqueeze(0).to(device).float() / 255.0
 
 
-def run_one(model: YOLO, image_path: Path, depth_path: Path, args: argparse.Namespace, device: torch.device) -> list[dict]:
+def run_one(
+    model: YOLO, image_path: Path, depth_path: Path, args: argparse.Namespace, device: torch.device
+) -> list[dict]:
     rgb = cv2.imread(str(image_path), cv2.IMREAD_COLOR)
     depth = cv2.imread(str(depth_path), cv2.IMREAD_UNCHANGED)
     if rgb is None or depth is None:
@@ -153,7 +156,9 @@ def corr(xs: list[float], ys: list[float]) -> float:
 def main() -> None:
     args = parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
-    device = torch.device("cpu" if args.device == "cpu" or not torch.cuda.is_available() else f"cuda:{args.device.split(',')[0]}")
+    device = torch.device(
+        "cpu" if args.device == "cpu" or not torch.cuda.is_available() else f"cuda:{args.device.split(',')[0]}"
+    )
 
     model = YOLO(str(args.model_yaml))
     model.load(str(args.weights))

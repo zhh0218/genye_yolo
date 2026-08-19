@@ -65,15 +65,15 @@ pre_model_name = "/workspace/ultralytics-main_for_genye/yolo11l.pt"
 最终版本训练时主要参数：
 
 ```python
-imgsz=640
-epochs=300
-batch=36
-workers=2
-device="0,1,2,3"
-optimizer="MuSGD"
-amp=True
-project="YOLOv11-RGB-D-coord_attv2-genye"
-name="coord_attv2-s"
+imgsz = 640
+epochs = 300
+batch = 36
+workers = 2
+device = "0,1,2,3"
+optimizer = "MuSGD"
+amp = True
+project = "YOLOv11-RGB-D-coord_attv2-genye"
+name = "coord_attv2-s"
 ```
 
 注意：如果已有同名运行目录，Ultralytics 会自动递增，例如 `coord_attv2-s8`、`coord_attv2-s9`。
@@ -100,8 +100,8 @@ test: /workspace/Datasets/final/images/test
 
 nc: 2
 names:
-  0: 00
-  1: 01
+    0: 00
+    1: 01
 ```
 
 特别注意：这个 YAML 只显式写了 RGB 图像路径，没有显式写 depth 路径。depth 路径是在代码中自动推断的。
@@ -295,10 +295,10 @@ RGB 怎么变，depth 也要怎么变。
 
 ```yaml
 nc: 80
-scale: 's'
+scale: "s"
 end2end: False
 reg_max: 1
-rgbd_fusion: 'coord_att_v2'
+rgbd_fusion: "coord_att_v2"
 p3_wavelet_guided: True
 p3_wavelet_HF: False
 p3_wavelet_adaptive: False
@@ -336,7 +336,7 @@ cmm
 当前最终版本使用：
 
 ```yaml
-rgbd_fusion: 'coord_att_v2'
+rgbd_fusion: "coord_att_v2"
 ```
 
 ### 7.3 `p3_wavelet_guided`
@@ -362,11 +362,9 @@ depth_fpn: True
 ### 7.5 `backbone` 和 `backboneD`
 
 ```yaml
-backbone:
-  ...
+backbone: ...
 
-backboneD:
-  ...
+backboneD: ...
 ```
 
 其中：
@@ -569,7 +567,7 @@ ultralytics/cfg/models/11/yolo11-seg.yaml
 目标：验证 wavelet 和 depth_fpn 是否有贡献。
 
 ```yaml
-rgbd_fusion: 'coord_att_v2'
+rgbd_fusion: "coord_att_v2"
 p3_wavelet_guided: False
 depth_fpn: False
 ```
@@ -586,7 +584,7 @@ LOG/genye11s_just_coord_att_v2.log
 目标：验证 P3 wavelet 是否有效。
 
 ```yaml
-rgbd_fusion: 'coord_att_v2'
+rgbd_fusion: "coord_att_v2"
 p3_wavelet_guided: True
 depth_fpn: False
 ```
@@ -603,7 +601,7 @@ LOG/genye11s.log
 目标：当前最终版本。
 
 ```yaml
-rgbd_fusion: 'coord_att_v2'
+rgbd_fusion: "coord_att_v2"
 p3_wavelet_guided: True
 depth_fpn: True
 ```
@@ -620,30 +618,30 @@ LOG/genye11s_just_coord_att_v2+p3+dfpn.log
 例如测试旧版 CoordAtt：
 
 ```yaml
-rgbd_fusion: 'coord_att'
+rgbd_fusion: "coord_att"
 ```
 
 测试 SE-like 轻量融合：
 
 ```yaml
-rgbd_fusion: 'se'
+rgbd_fusion: "se"
 ```
 
 测试 cross attention：
 
 ```yaml
-rgbd_fusion: 'cross_v2'
+rgbd_fusion: "cross_v2"
 ```
 
 每次改动后建议同步修改训练 name，避免覆盖或混淆实验目录。
 
 ## 11. 三组关键实验对比
 
-| run | 结构 | best Mask mAP50-95 | final best.pt Mask mAP50-95 | final best.pt Box mAP50-95 |
-|---|---|---:|---:|---:|
-| `s3` | CoordAttV2 + P3 wavelet | 0.79678 | 0.79603 | 0.82316 |
-| `s7` | just CoordAttV2 | 0.79749 | 0.79475 | 0.82420 |
-| `s8` | CoordAttV2 + P3 wavelet + Depth FPN | 0.80303 | 0.79863 | 0.82339 |
+| run  | 结构                                | best Mask mAP50-95 | final best.pt Mask mAP50-95 | final best.pt Box mAP50-95 |
+| ---- | ----------------------------------- | -----------------: | --------------------------: | -------------------------: |
+| `s3` | CoordAttV2 + P3 wavelet             |            0.79678 |                     0.79603 |                    0.82316 |
+| `s7` | just CoordAttV2                     |            0.79749 |                     0.79475 |                    0.82420 |
+| `s8` | CoordAttV2 + P3 wavelet + Depth FPN |            0.80303 |                     0.79863 |                    0.82339 |
 
 结论：
 
