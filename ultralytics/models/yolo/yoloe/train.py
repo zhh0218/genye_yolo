@@ -20,11 +20,10 @@ from .val import YOLOEDetectValidator
 
 
 class YOLOETrainer(DetectionTrainer):
-    """
-    A trainer class for YOLOE object detection models.
+    """A trainer class for YOLOE object detection models.
 
-    This class extends DetectionTrainer to provide specialized training functionality for YOLOE models,
-    including custom model initialization, validation, and dataset building with multi-modal support.
+    This class extends DetectionTrainer to provide specialized training functionality for YOLOE models, including custom
+    model initialization, validation, and dataset building with multi-modal support.
 
     Attributes:
         loss_names (tuple): Names of loss components used during training.
@@ -36,8 +35,7 @@ class YOLOETrainer(DetectionTrainer):
     """
 
     def __init__(self, cfg=DEFAULT_CFG, overrides: dict | None = None, _callbacks=None):
-        """
-        Initialize the YOLOE Trainer with specified configurations.
+        """Initialize the YOLOE Trainer with specified configurations.
 
         This method sets up the YOLOE trainer with the provided configuration and overrides, initializing
         the training environment, model, and callbacks for YOLOE object detection training.
@@ -53,12 +51,11 @@ class YOLOETrainer(DetectionTrainer):
         super().__init__(cfg, overrides, _callbacks)
 
     def get_model(self, cfg=None, weights=None, verbose: bool = True):
-        """
-        Return a YOLOEModel initialized with the specified configuration and weights.
+        """Return a YOLOEModel initialized with the specified configuration and weights.
 
         Args:
-            cfg (dict | str, optional): Model configuration. Can be a dictionary containing a 'yaml_file' key,
-                a direct path to a YAML file, or None to use default configuration.
+            cfg (dict | str, optional): Model configuration. Can be a dictionary containing a 'yaml_file' key, a direct
+                path to a YAML file, or None to use default configuration.
             weights (str | Path, optional): Path to pretrained weights file to load into the model.
             verbose (bool): Whether to display model information during initialization.
 
@@ -91,8 +88,7 @@ class YOLOETrainer(DetectionTrainer):
         )
 
     def build_dataset(self, img_path: str, mode: str = "train", batch: int | None = None):
-        """
-        Build YOLO Dataset.
+        """Build YOLO Dataset.
 
         Args:
             img_path (str): Path to the folder containing images.
@@ -109,19 +105,17 @@ class YOLOETrainer(DetectionTrainer):
 
 
 class YOLOEPETrainer(DetectionTrainer):
-    """
-    Fine-tune YOLOE model using linear probing approach.
+    """Fine-tune YOLOE model using linear probing approach.
 
-    This trainer freezes most model layers and only trains specific projection layers for efficient
-    fine-tuning on new datasets while preserving pretrained features.
+    This trainer freezes most model layers and only trains specific projection layers for efficient fine-tuning on new
+    datasets while preserving pretrained features.
 
     Methods:
         get_model: Initialize YOLOEModel with frozen layers except projection layers.
     """
 
     def get_model(self, cfg=None, weights=None, verbose: bool = True):
-        """
-        Return YOLOEModel initialized with specified config and weights.
+        """Return YOLOEModel initialized with specified config and weights.
 
         Args:
             cfg (dict | str, optional): Model configuration.
@@ -163,11 +157,10 @@ class YOLOEPETrainer(DetectionTrainer):
 
 
 class YOLOETrainerFromScratch(YOLOETrainer, WorldTrainerFromScratch):
-    """
-    Train YOLOE models from scratch with text embedding support.
+    """Train YOLOE models from scratch with text embedding support.
 
-    This trainer combines YOLOE training capabilities with world training features, enabling
-    training from scratch with text embeddings and grounding datasets.
+    This trainer combines YOLOE training capabilities with world training features, enabling training from scratch with
+    text embeddings and grounding datasets.
 
     Methods:
         build_dataset: Build datasets for training with grounding support.
@@ -176,8 +169,7 @@ class YOLOETrainerFromScratch(YOLOETrainer, WorldTrainerFromScratch):
     """
 
     def build_dataset(self, img_path: list[str] | str, mode: str = "train", batch: int | None = None):
-        """
-        Build YOLO Dataset for training or validation.
+        """Build YOLO Dataset for training or validation.
 
         This method constructs appropriate datasets based on the mode and input paths, handling both
         standard YOLO datasets and grounding datasets with different formats.
@@ -203,8 +195,7 @@ class YOLOETrainerFromScratch(YOLOETrainer, WorldTrainerFromScratch):
         return batch
 
     def generate_text_embeddings(self, texts: list[str], batch: int, cache_dir: Path):
-        """
-        Generate text embeddings for a list of text samples.
+        """Generate text embeddings for a list of text samples.
 
         Args:
             texts (list[str]): List of text samples to encode.
@@ -230,11 +221,10 @@ class YOLOETrainerFromScratch(YOLOETrainer, WorldTrainerFromScratch):
 
 
 class YOLOEPEFreeTrainer(YOLOEPETrainer, YOLOETrainerFromScratch):
-    """
-    Train prompt-free YOLOE model.
+    """Train prompt-free YOLOE model.
 
-    This trainer combines linear probing capabilities with from-scratch training for prompt-free
-    YOLOE models that don't require text prompts during inference.
+    This trainer combines linear probing capabilities with from-scratch training for prompt-free YOLOE models that don't
+    require text prompts during inference.
 
     Methods:
         get_validator: Return standard DetectionValidator for validation.
@@ -254,8 +244,7 @@ class YOLOEPEFreeTrainer(YOLOEPETrainer, YOLOETrainerFromScratch):
         return DetectionTrainer.preprocess_batch(self, batch)
 
     def set_text_embeddings(self, datasets, batch: int):
-        """
-        Set text embeddings for datasets to accelerate training by caching category names.
+        """Set text embeddings for datasets to accelerate training by caching category names.
 
         This method collects unique category names from all datasets, generates text embeddings for them,
         and caches these embeddings to improve training efficiency. The embeddings are stored in a file
@@ -270,15 +259,13 @@ class YOLOEPEFreeTrainer(YOLOEPETrainer, YOLOETrainerFromScratch):
             at the path specified by 'cache_path'. If the cache file already exists, it will be loaded
             instead of regenerating the embeddings.
         """
-        pass
 
 
 class YOLOEVPTrainer(YOLOETrainerFromScratch):
-    """
-    Train YOLOE model with visual prompts.
+    """Train YOLOE model with visual prompts.
 
-    This trainer extends YOLOETrainerFromScratch to support visual prompt-based training,
-    where visual cues are provided alongside images to guide the detection process.
+    This trainer extends YOLOETrainerFromScratch to support visual prompt-based training, where visual cues are provided
+    alongside images to guide the detection process.
 
     Methods:
         build_dataset: Build dataset with visual prompt loading transforms.
@@ -286,8 +273,7 @@ class YOLOEVPTrainer(YOLOETrainerFromScratch):
     """
 
     def build_dataset(self, img_path: list[str] | str, mode: str = "train", batch: int | None = None):
-        """
-        Build YOLO Dataset for training or validation with visual prompts.
+        """Build YOLO Dataset for training or validation with visual prompts.
 
         Args:
             img_path (list[str] | str): Path to the folder containing images or list of paths.
