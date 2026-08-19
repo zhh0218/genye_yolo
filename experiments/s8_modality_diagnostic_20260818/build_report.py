@@ -21,7 +21,10 @@ def _read_json(path: Path) -> dict | None:
 def _mode_table(payload: dict | None) -> str:
     if not payload:
         return "| 模式 | λ_R | λ_D | Box mAP50-95 | Mask mAP50-95 | Box mAP50 | Mask mAP50 |\n|---|---:|---:|---:|---:|---:|---:|\n| 未运行四态验证 | - | - | - | - | - | - |"
-    rows = ["| 模式 | λ_R | λ_D | Box mAP50-95 | Mask mAP50-95 | Box mAP50 | Mask mAP50 |", "|---|---:|---:|---:|---:|---:|---:|"]
+    rows = [
+        "| 模式 | λ_R | λ_D | Box mAP50-95 | Mask mAP50-95 | Box mAP50 | Mask mAP50 |",
+        "|---|---:|---:|---:|---:|---:|---:|",
+    ]
     for mode in ["RD", "R-only", "D-only", "Empty"]:
         r = payload["modes"][mode]
         rows.append(
@@ -40,7 +43,10 @@ def _shapley_table(payload: dict | None) -> str:
         "mask_map": "Mask mAP50-95",
         "mask_map50": "Mask mAP50",
     }
-    rows = ["| 指标 | RGB Shapley | Depth Shapley | RGB 占比 | Depth 占比 | 交互项 I_RD |", "|---|---:|---:|---:|---:|---:|"]
+    rows = [
+        "| 指标 | RGB Shapley | Depth Shapley | RGB 占比 | Depth 占比 | 交互项 I_RD |",
+        "|---|---:|---:|---:|---:|---:|",
+    ]
     for r in payload["shapley"]:
         rows.append(
             f"| {name.get(r['metric'], r['metric'])} | {_fmt(r.get('rgb_contribution'))} | "
@@ -93,16 +99,16 @@ def _parameter_table(payload: dict | None) -> str:
         return "| 参数 | 值 | 说明 |\n|---|---|---|\n| 未运行四态验证 | - | - |"
     return f"""| 参数 | 值 | 说明 |
 |---|---:|---|
-| weights | `{payload['weights']}` | S8 `best.pt` checkpoint |
-| data | `{payload['data']}` | 本次四态验证使用的数据配置 |
+| weights | `{payload["weights"]}` | S8 `best.pt` checkpoint |
+| data | `{payload["data"]}` | 本次四态验证使用的数据配置 |
 | split | `val` | 只在验证集上诊断，不训练 |
-| imgsz | `{payload['imgsz']}` | 与原始训练保持 640 输入尺寸 |
-| batch | `{payload['batch']}` | RTX 5060 Laptop GPU 上稳定运行 |
-| device | `{payload['device']}` | 使用本机 CUDA GPU |
-| workers | `{payload['workers']}` | Windows 下设为 0，避免多进程 dataloader 问题 |
-| conf | `{payload['conf']}` | Ultralytics val 默认低置信度阈值，用于 mAP 统计 |
-| iou | `{payload['iou']}` | NMS IoU 阈值 |
-| feature mute layers | `{payload['fusion_indices']}` | P3/P4/P5 三个 RGB-D 融合入口 |
+| imgsz | `{payload["imgsz"]}` | 与原始训练保持 640 输入尺寸 |
+| batch | `{payload["batch"]}` | RTX 5060 Laptop GPU 上稳定运行 |
+| device | `{payload["device"]}` | 使用本机 CUDA GPU |
+| workers | `{payload["workers"]}` | Windows 下设为 0，避免多进程 dataloader 问题 |
+| conf | `{payload["conf"]}` | Ultralytics val 默认低置信度阈值，用于 mAP 统计 |
+| iou | `{payload["iou"]}` | NMS IoU 阈值 |
+| feature mute layers | `{payload["fusion_indices"]}` | P3/P4/P5 三个 RGB-D 融合入口 |
 | λ_R/λ_D | `RD=(1,1), R-only=(1,0), D-only=(0,1), Empty=(0,0)` | Shapley 四态输入开关 |"""
 
 
@@ -127,9 +133,9 @@ def _result_analysis(payload: dict | None) -> str:
 
 再看边际增益。如果从 R-only 加回 Depth，Box mAP50-95 提升 {box_gain_r:.4f}，Mask mAP50-95 提升 {mask_gain_r:.4f}。这说明 Depth 对最终 RD 结果仍然有补充作用，并不是完全被模型忽略。相反，如果从 D-only 加回 RGB，Box mAP50-95 提升 {box_gain_d:.4f}，Mask mAP50-95 提升 {mask_gain_d:.4f}，提升更大，说明 RGB 对联合预测的主导性更强。
 
-Shapley 分解给出更稳健的贡献率。对 Box mAP50-95，RGB 贡献为 {shp['box_map']['rgb_contribution']:.4f}，占 {shp['box_map']['rgb_ratio'] * 100:.2f}%；Depth 贡献为 {shp['box_map']['depth_contribution']:.4f}，占 {shp['box_map']['depth_ratio'] * 100:.2f}%。对 Mask mAP50-95，RGB 贡献为 {shp['mask_map']['rgb_contribution']:.4f}，占 {shp['mask_map']['rgb_ratio'] * 100:.2f}%；Depth 贡献为 {shp['mask_map']['depth_contribution']:.4f}，占 {shp['mask_map']['depth_ratio'] * 100:.2f}%。因此，如果只用一句话概括当前 S8：Box 任务约为 RGB 67% / Depth 33%，Mask 任务约为 RGB 75% / Depth 25%。
+Shapley 分解给出更稳健的贡献率。对 Box mAP50-95，RGB 贡献为 {shp["box_map"]["rgb_contribution"]:.4f}，占 {shp["box_map"]["rgb_ratio"] * 100:.2f}%；Depth 贡献为 {shp["box_map"]["depth_contribution"]:.4f}，占 {shp["box_map"]["depth_ratio"] * 100:.2f}%。对 Mask mAP50-95，RGB 贡献为 {shp["mask_map"]["rgb_contribution"]:.4f}，占 {shp["mask_map"]["rgb_ratio"] * 100:.2f}%；Depth 贡献为 {shp["mask_map"]["depth_contribution"]:.4f}，占 {shp["mask_map"]["depth_ratio"] * 100:.2f}%。因此，如果只用一句话概括当前 S8：Box 任务约为 RGB 67% / Depth 33%，Mask 任务约为 RGB 75% / Depth 25%。
 
-交互项方面，Box mAP50-95 的 `I_RD={shp['box_map']['interaction']:.4f}`，为负值，表示两模态在 Box 严格指标上存在一定冗余或融合干扰；Mask mAP50-95 的 `I_RD={shp['mask_map']['interaction']:.4f}`，接近 0 且略为正，说明 Depth 对 mask 严格指标有少量互补，但互补幅度很小。Box mAP50 的交互项为 {shp['box_map50']['interaction']:.4f}，负值更明显，说明在较宽松 IoU 阈值下 RGB 与 Depth 的检测信息重叠较多。
+交互项方面，Box mAP50-95 的 `I_RD={shp["box_map"]["interaction"]:.4f}`，为负值，表示两模态在 Box 严格指标上存在一定冗余或融合干扰；Mask mAP50-95 的 `I_RD={shp["mask_map"]["interaction"]:.4f}`，接近 0 且略为正，说明 Depth 对 mask 严格指标有少量互补，但互补幅度很小。Box mAP50 的交互项为 {shp["box_map50"]["interaction"]:.4f}，负值更明显，说明在较宽松 IoU 阈值下 RGB 与 Depth 的检测信息重叠较多。
 
 需要强调的是，这个结果还不能直接推出“Depth 没学好”。它只能证明：在联合训练后的 S8 checkpoint 中，把 RGB 静默后，Depth 路径能独立贡献的有效预测较少。要判断原因，还需要同等训练设置下的 Depth-only 单模态参考模型。如果 `Q_D^solo` 明显高于这里的 `Q_D^joint-mute`，才说明 Depth 在联合训练中可能被 RGB 压制；如果 `Q_D^solo` 本身也低，则更可能是当前 Depth 数据或 Depth 分支表达能力有限。"""
 
@@ -151,9 +157,7 @@ def main() -> None:
         )
 
     val_params = "尚未运行四态验证。"
-    dataset_note = (
-        "四态验证尚未运行。"
-    )
+    dataset_note = "四态验证尚未运行。"
     if four_state:
         val_params = (
             f"权重：`{four_state['weights']}`；数据：`{four_state['data']}`；"
