@@ -12,8 +12,7 @@ from ultralytics.utils.plotting import plot_results
 
 
 class SegmentationTrainer(yolo.detect.DetectionTrainer):
-    """
-    A class extending the DetectionTrainer class for training based on a segmentation model.
+    """A class extending the DetectionTrainer class for training based on a segmentation model.
 
     This trainer specializes in handling segmentation tasks, extending the detection trainer with segmentation-specific
     functionality including model initialization, validation, and visualization.
@@ -29,8 +28,7 @@ class SegmentationTrainer(yolo.detect.DetectionTrainer):
     """
 
     def __init__(self, cfg=DEFAULT_CFG, overrides: dict | None = None, _callbacks=None):
-        """
-        Initialize a SegmentationTrainer object.
+        """Initialize a SegmentationTrainer object.
 
         This initializes a trainer for segmentation tasks, extending the detection trainer with segmentation-specific
         functionality. It sets the task to 'segment' and prepares the trainer for training segmentation models.
@@ -52,8 +50,7 @@ class SegmentationTrainer(yolo.detect.DetectionTrainer):
         super().__init__(cfg, overrides, _callbacks)
 
     def get_model(self, cfg: dict | str | None = None, weights: str | Path | None = None, verbose: bool = True):
-        """
-        Initialize and return a SegmentationModel with specified configuration and weights.
+        """Initialize and return a SegmentationModel with specified configuration and weights.
 
         Args:
             cfg (dict | str, optional): Model configuration. Can be a dictionary, a path to a YAML file, or None.
@@ -77,7 +74,9 @@ class SegmentationTrainer(yolo.detect.DetectionTrainer):
     def get_validator(self):
         """Return an instance of SegmentationValidator for validation of YOLO model."""
         self.loss_names = "box_loss", "seg_loss", "cls_loss", "dfl_loss"
-        return yolo.segment.SegmentationValidator(self.test_loader, save_dir=self.save_dir, args=copy(self.args), _callbacks=self.callbacks)
+        return yolo.segment.SegmentationValidator(
+            self.test_loader, save_dir=self.save_dir, args=copy(self.args), _callbacks=self.callbacks
+        )
 
     def plot_metrics(self):
         """Plot training/validation metrics."""
