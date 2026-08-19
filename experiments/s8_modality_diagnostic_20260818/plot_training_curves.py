@@ -35,7 +35,9 @@ def main() -> None:
     root = _repo_root()
     exp_dir = Path(__file__).resolve().parent
     parser = argparse.ArgumentParser()
-    parser.add_argument("--results-csv", default=str(root / "YOLOv11-RGB-D-coord_attv2-genye/coord_attv2-s8/results.csv"))
+    parser.add_argument(
+        "--results-csv", default=str(root / "YOLOv11-RGB-D-coord_attv2-genye/coord_attv2-s8/results.csv")
+    )
     parser.add_argument("--output-dir", default=str(exp_dir / "outputs"))
     args = parser.parse_args()
 
@@ -91,7 +93,9 @@ def main() -> None:
         "final_box_map": round(final["metrics/mAP50-95(B)"], 6),
         "final_mask_map": round(final["metrics/mAP50-95(M)"], 6),
     }
-    (out_dir / "training_curve_summary.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
+    (out_dir / "training_curve_summary.json").write_text(
+        json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
     print(json.dumps(summary, indent=2, ensure_ascii=False))
 
 
