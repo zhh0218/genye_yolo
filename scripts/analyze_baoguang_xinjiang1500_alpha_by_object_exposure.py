@@ -12,7 +12,9 @@ sys.path.insert(0, "/workspace/ultralytics-main_for_genye_release")
 from ultralytics import YOLO
 from ultralytics.models.yolo.segment.val import SegmentationValidator
 
-WEIGHTS = Path("/workspace/ultralytics-main_for_genye_release/YOLOv11-RGB-D-coord_attv2-genye/xinjiang_1500_experiments/xinjiang_1500_baoguang_from_coordattv2s8_lr001-spillum-learnblend-auxoff-3gpu_b36-seed20260702/weights/best.pt")
+WEIGHTS = Path(
+    "/workspace/ultralytics-main_for_genye_release/YOLOv11-RGB-D-coord_attv2-genye/xinjiang_1500_experiments/xinjiang_1500_baoguang_from_coordattv2s8_lr001-spillum-learnblend-auxoff-3gpu_b36-seed20260702/weights/best.pt"
+)
 DATA = Path("/workspace/ultralytics-main_for_genye_release/Dataset/xinjiang_1500_baoguang/data_3cls.yaml")
 OUT_DIR = Path("/workspace/genye_rgbd_route_probe/alpha_stats")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -59,7 +61,9 @@ class AlphaExposureValidator(SegmentationValidator):
                 blend = [float("nan"), float("nan")]
                 if hasattr(module, "blend_logits"):
                     blend = torch.softmax(module.blend_logits.detach().cpu(), dim=0).tolist()
-                self.blends.append({"module": name, "stage": STAGE_MAP.get(name, name), "blend_base": blend[0], "blend_out": blend[1]})
+                self.blends.append(
+                    {"module": name, "stage": STAGE_MAP.get(name, name), "blend_base": blend[0], "blend_out": blend[1]}
+                )
         self.values = {}
         self.pixel_counts = {}
 
@@ -93,10 +97,14 @@ class AlphaExposureValidator(SegmentationValidator):
                 a = a.mean(dim=1, keepdim=True)
             stage = STAGE_MAP.get(name, name)
             append_vals(self.values, stage, "all_pixels", a)
-            self.pixel_counts.setdefault(stage, {})["all_pixels"] = self.pixel_counts.setdefault(stage, {}).get("all_pixels", 0) + int(a.numel())
+            self.pixel_counts.setdefault(stage, {})["all_pixels"] = self.pixel_counts.setdefault(stage, {}).get(
+                "all_pixels", 0
+            ) + int(a.numel())
             for cat, mask_m in masks_m.items():
                 mask_a = F.interpolate(mask_m.float(), size=a.shape[-2:], mode="nearest") > 0.5
-                self.pixel_counts.setdefault(stage, {})[cat] = self.pixel_counts.setdefault(stage, {}).get(cat, 0) + int(mask_a.sum().item())
+                self.pixel_counts.setdefault(stage, {})[cat] = self.pixel_counts.setdefault(stage, {}).get(
+                    cat, 0
+                ) + int(mask_a.sum().item())
                 append_vals(self.values, stage, cat, a, mask_a)
         super().update_metrics(preds, batch)
 
@@ -107,22 +115,36 @@ class AlphaExposureValidator(SegmentationValidator):
                 chunks = self.values.get(stage, {}).get(cat, [])
                 count = self.pixel_counts.get(stage, {}).get(cat, 0)
                 if not chunks:
-                    rows.append({"stage": stage, "category": cat, "n_alpha_pixels": count, "alpha_mean": "", "alpha_p25": "", "alpha_p50": "", "alpha_p75": "", "alpha_p95": "", "depth_weight_mean": ""})
+                    rows.append(
+                        {
+                            "stage": stage,
+                            "category": cat,
+                            "n_alpha_pixels": count,
+                            "alpha_mean": "",
+                            "alpha_p25": "",
+                            "alpha_p50": "",
+                            "alpha_p75": "",
+                            "alpha_p95": "",
+                            "depth_weight_mean": "",
+                        }
+                    )
                     continue
                 vals = torch.cat(chunks)
                 q = torch.quantile(vals, torch.tensor([0.25, 0.5, 0.75, 0.95]))
                 mean = float(vals.mean())
-                rows.append({
-                    "stage": stage,
-                    "category": cat,
-                    "n_alpha_pixels": int(vals.numel()),
-                    "alpha_mean": mean,
-                    "alpha_p25": float(q[0]),
-                    "alpha_p50": float(q[1]),
-                    "alpha_p75": float(q[2]),
-                    "alpha_p95": float(q[3]),
-                    "depth_weight_mean": 1.0 - mean,
-                })
+                rows.append(
+                    {
+                        "stage": stage,
+                        "category": cat,
+                        "n_alpha_pixels": int(vals.numel()),
+                        "alpha_mean": mean,
+                        "alpha_p25": float(q[0]),
+                        "alpha_p50": float(q[1]),
+                        "alpha_p75": float(q[2]),
+                        "alpha_p95": float(q[3]),
+                        "depth_weight_mean": 1.0 - mean,
+                    }
+                )
         with OUT_JSON.open("w", encoding="utf-8") as f:
             json.dump(rows, f, ensure_ascii=False, indent=2)
         with OUT_CSV.open("w", encoding="utf-8-sig", newline="") as f:
@@ -158,6 +180,7 @@ def main():
         name="baoguang_xinjiang1500_baoguang_best_val300_alpha_exposure",
         exist_ok=True,
     )
+
 
 if __name__ == "__main__":
     main()

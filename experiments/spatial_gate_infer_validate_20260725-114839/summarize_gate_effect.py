@@ -10,7 +10,6 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CSV = Path(__file__).resolve().parent / "outputs" / "spatial_gate_rgb_depth_weights.csv"
 DEFAULT_IMAGE_DIR = ROOT / "Dataset" / "xinjiang_1500_baoguang" / "images" / "val_ab"
@@ -40,7 +39,7 @@ def quantile(values: list[float], q: float) -> float:
     if not values:
         return float("nan")
     values = sorted(values)
-    idx = min(len(values) - 1, max(0, int(round(q * (len(values) - 1)))))
+    idx = min(len(values) - 1, max(0, round(q * (len(values) - 1))))
     return float(values[idx])
 
 
@@ -183,7 +182,9 @@ def main() -> None:
                 "fraction_depth_increased_on_overexposure": mean([1.0 if x > 0 else 0.0 for x in depth_d]),
             },
             "corr_over088_delta_vs_src_delta": corr(exp_d, src_d),
-            "largest_depth_increase_examples": sorted(deltas, key=lambda d: d["depth_delta_over_minus_normal"], reverse=True)[:10],
+            "largest_depth_increase_examples": sorted(
+                deltas, key=lambda d: d["depth_delta_over_minus_normal"], reverse=True
+            )[:10],
         }
 
     result = {

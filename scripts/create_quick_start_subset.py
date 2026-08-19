@@ -5,7 +5,6 @@ import random
 import shutil
 from pathlib import Path
 
-
 SRC_ROOT = Path("/workspace/Datasets/final")
 OUT_ROOT = Path("/workspace/ultralytics-main_for_genye/examples/quick_start")
 SEED = 20260519
@@ -50,10 +49,7 @@ def collect_pairs(split: str) -> list[tuple[Path, Path, Path]]:
             continue
         pairs.append((image_path, depth_path, label_path))
 
-    print(
-        f"{split}: usable={len(pairs)}, missing_depth={missing_depth}, "
-        f"missing_label={missing_label}"
-    )
+    print(f"{split}: usable={len(pairs)}, missing_depth={missing_depth}, missing_label={missing_label}")
     return pairs
 
 
