@@ -11,7 +11,9 @@ sys.path.insert(0, "/workspace/ultralytics-main_for_genye_release")
 from ultralytics import YOLO
 from ultralytics.models.yolo.segment.val import SegmentationValidator
 
-WEIGHTS = Path("/workspace/ultralytics-main_for_genye_release/YOLOv11-RGB-D-coord_attv2-genye/xinjiang_1500_experiments/xinjiang_1500_from_coordattv2s8_lr001-spillum-learnblend-auxoff-3gpu_b36-seed20260702/weights/best.pt")
+WEIGHTS = Path(
+    "/workspace/ultralytics-main_for_genye_release/YOLOv11-RGB-D-coord_attv2-genye/xinjiang_1500_experiments/xinjiang_1500_from_coordattv2s8_lr001-spillum-learnblend-auxoff-3gpu_b36-seed20260702/weights/best.pt"
+)
 DATA = Path("/workspace/ultralytics-main_for_genye_release/Dataset/xinjiang_1500/data_3cls.yaml")
 OUT_DIR = Path("/workspace/genye_rgbd_route_probe/alpha_stats")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -23,6 +25,7 @@ STAGE_MAP = {
     "model.37.coord_att": "P4/16",
     "model.38.coord_att": "P5/32",
 }
+
 
 class AlphaStatsValidator(SegmentationValidator):
     def init_metrics(self, model):
@@ -75,8 +78,8 @@ class AlphaStatsValidator(SegmentationValidator):
                 "alpha_max": float(vals.max()),
                 "per_image_mean_mean": float(img_means.mean()),
                 "per_image_mean_std": float(img_means.std(unbiased=False)),
-                "blend_base": float(self.blend.get(name, [float('nan'), float('nan')])[0]),
-                "blend_out": float(self.blend.get(name, [float('nan'), float('nan')])[1]),
+                "blend_base": float(self.blend.get(name, [float("nan"), float("nan")])[0]),
+                "blend_out": float(self.blend.get(name, [float("nan"), float("nan")])[1]),
             }
             summary.append(row)
 
@@ -111,6 +114,7 @@ def main():
         name="clean_xinjiang1500_best_val300_alpha",
         exist_ok=True,
     )
+
 
 if __name__ == "__main__":
     main()

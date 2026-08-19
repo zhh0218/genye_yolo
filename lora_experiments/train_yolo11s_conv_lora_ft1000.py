@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Conv-LoRA fine-tuning for the custom YOLOv11s RGB-D segmentation model.
 
 The experiment keeps the existing YAML/model code untouched:
@@ -13,7 +12,6 @@ The experiment keeps the existing YAML/model code untouched:
 from __future__ import annotations
 
 import argparse
-import copy
 import json
 import math
 import shutil
@@ -21,9 +19,7 @@ import sys
 from pathlib import Path
 
 import torch
-import torch.nn as nn
-from torch import optim
-
+from torch import nn, optim
 
 REPO = Path("/workspace/ultralytics-main_for_genye")
 BASE_WEIGHTS = REPO / "YOLOv11-RGB-D-coord_attv2-genye/coord_attv2-s8/weights/best.pt"
@@ -136,7 +132,9 @@ def inject_lora(module: nn.Module, rank: int, alpha: float, min_channels: int, p
     return records
 
 
-def inject_lora_to_model(model: nn.Module, target_layers: set[int], rank: int, alpha: float, min_channels: int) -> list[dict]:
+def inject_lora_to_model(
+    model: nn.Module, target_layers: set[int], rank: int, alpha: float, min_channels: int
+) -> list[dict]:
     records: list[dict] = []
     layers = getattr(model, "model", None)
     if layers is None:
@@ -213,10 +211,10 @@ def backup_and_merge_checkpoint_inplace(src: Path) -> dict:
 
 
 def make_trainer(args):
+    from ultralytics.engine.trainer import MuSGD
     from ultralytics.models.yolo.segment.train import SegmentationTrainer
     from ultralytics.nn.tasks import SegmentationModel
     from ultralytics.utils import LOGGER, RANK, colorstr
-    from ultralytics.engine.trainer import MuSGD
 
     target_layers = parse_layer_ids(args.lora_layers)
     trainable_layers = parse_layer_ids(args.trainable_layers)
@@ -298,12 +296,18 @@ def make_trainer(args):
             elif name == "SGD":
                 optimizer = optim.SGD(g[2], lr=lr, momentum=momentum, nesterov=True)
             elif name == "MuSGD":
-                optim_args = dict(lr=lr, momentum=momentum, nesterov=True)
+                optim_args = {"lr": lr, "momentum": momentum, "nesterov": True}
                 g_musgd = [
                     {"params": g[2], **optim_args, "weight_decay": 0.0, "use_muon": False, "param_group": "bias"},
                     {"params": g[1], **optim_args, "weight_decay": 0.0, "use_muon": False, "param_group": "bn"},
                     {"params": g[0], **optim_args, "weight_decay": decay, "use_muon": True, "param_group": "muon"},
-                    {"params": g_decay_sgd, **optim_args, "weight_decay": decay, "use_muon": False, "param_group": "sgd"},
+                    {
+                        "params": g_decay_sgd,
+                        **optim_args,
+                        "weight_decay": decay,
+                        "use_muon": False,
+                        "param_group": "sgd",
+                    },
                 ]
                 optimizer = MuSGD(params=g_musgd, muon=0.5, sgd=0.5)
                 LOGGER.info(
@@ -373,7 +377,11 @@ def main():
             min_channels=args.min_channels,
         )
         summary = apply_trainable_policy(model, parse_layer_ids(args.trainable_layers))
-        print(json.dumps({**summary, "lora_module_count": len(records), "records": records[:20]}, ensure_ascii=False, indent=2))
+        print(
+            json.dumps(
+                {**summary, "lora_module_count": len(records), "records": records[:20]}, ensure_ascii=False, indent=2
+            )
+        )
         return
 
     model = YOLO(args.weights)
