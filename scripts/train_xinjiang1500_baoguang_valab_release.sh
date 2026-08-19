@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+RELEASE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REPO="${RELEASE_ROOT}"
+PY="${PY:-/root/miniconda3/envs/yolo26/bin/python}"
+MODEL_CFG="${RELEASE_ROOT}/configs/yolo11-seg-spatialillum-learnblend-auxoff-xinjiang1500.yaml"
+PRETRAIN="${RELEASE_ROOT}/YOLOv11-RGB-D-coord_attv2-genye/coord_attv2-s8/weights/best.pt"
+RUN_ROOT="${RELEASE_ROOT}/YOLOv11-RGB-D-coord_attv2-genye/xinjiang_1500_experiments_release_rerun"
+mkdir -p "${RUN_ROOT}"
+cd "${REPO}"
+export PYTHONPATH="${REPO}:${PYTHONPATH:-}"
+
+DATA_YAML="${RELEASE_ROOT}/Dataset/xinjiang_1500_baoguang/data_3cls_val_ab.yaml"
+RUN_NAME="${RUN_NAME:-xinjiang_1500_baoguang_valab_release_$(date +%Y%m%d_%H%M%S)}"
+DEVICE="${DEVICE:-0}"
+BATCH="${BATCH:-12}"
+
+"${PY}" -c "from ultralytics.cfg import entrypoint; raise SystemExit(entrypoint())" segment train \
+  model="${MODEL_CFG}" \
+  data="${DATA_YAML}" \
+  epochs=150 \
+  patience=50 \
+  batch="${BATCH}" \
+  imgsz=640 \
+  save=True \
+  save_period=-1 \
+  cache=False \
+  device="${DEVICE}" \
+  workers=2 \
+  project="${RUN_ROOT}" \
+  name="${RUN_NAME}" \
+  exist_ok=False \
+  pretrained="${PRETRAIN}" \
+  optimizer=MuSGD \
+  verbose=True \
+  seed=20260702 \
+  deterministic=True \
+  single_cls=False \
+  rect=False \
+  cos_lr=False \
+  close_mosaic=10 \
+  resume=False \
+  amp=True \
+  fraction=1.0 \
+  overlap_mask=True \
+  mask_ratio=4 \
+  dropout=0.0 \
+  val=True \
+  split=val \
+  stack_metric=True \
+  stack_metric_cls=1 \
+  stack_metric_conf=0.55 \
+  business_stack_metric=True \
+  business_stack2_metric=True \
+  business_stack_single_cls=0 \
+  business_stack_close_mm=12.25 \
+  business_stack_pix_to_mm=0.35 \
+  iou=0.7 \
+  max_det=300 \
+  half=False \
+  plots=True \
+  lr0=0.001 \
+  lrf=0.001 \
+  momentum=0.937 \
+  weight_decay=0.0001 \
+  warmup_epochs=3.0 \
+  warmup_momentum=0.8 \
+  warmup_bias_lr=0.1 \
+  box=7.5 \
+  cls=0.5 \
+  dfl=1.5 \
+  nbs=64 \
+  hsv_h=0.015 \
+  hsv_s=0.7 \
+  hsv_v=0.4 \
+  degrees=0.0 \
+  translate=0.1 \
+  scale=0.5 \
+  shear=0.0 \
+  perspective=0.0 \
+  flipud=0.0 \
+  fliplr=0.5 \
+  bgr=0.0 \
+  mosaic=1.0 \
+  mixup=0.0 \
+  cutmix=0.0 \
+  copy_paste=0.0 \
+  auto_augment=randaugment \
+  erasing=0.4

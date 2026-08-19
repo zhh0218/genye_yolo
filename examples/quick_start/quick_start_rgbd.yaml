@@ -1,0 +1,11 @@
+# Quick-start RGB-D subset for learning and smoke tests.
+# RGB paths are explicit; depth paths are inferred by replacing /images/ with /depth/.
+
+train: /workspace/ultralytics-main_for_genye/examples/quick_start/dataset/images/train
+val: /workspace/ultralytics-main_for_genye/examples/quick_start/dataset/images/val
+test: /workspace/ultralytics-main_for_genye/examples/quick_start/dataset/images/val
+
+nc: 2
+names:
+  0: 00
+  1: 01

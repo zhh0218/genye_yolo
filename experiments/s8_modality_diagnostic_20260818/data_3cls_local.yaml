@@ -1,0 +1,10 @@
+# Local Windows copy of Dataset/xinjiang_1500/data_3cls.yaml for isolated S8 modality diagnostics.
+path: D:/Graduate/project/genye/Dataset/xinjiang_1500
+train: images/train
+val: images/val
+
+nc: 3
+names:
+  0: 00
+  1: 01
+  2: 10

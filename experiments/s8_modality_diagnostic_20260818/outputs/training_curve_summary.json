@@ -1,0 +1,11 @@
+{
+  "results_csv": "D:\\Graduate\\project\\genye\\YOLOv11-RGB-D-coord_attv2-genye\\coord_attv2-s8\\results.csv",
+  "epochs": 300,
+  "best_box_epoch": 132,
+  "best_box_map": 0.82416,
+  "best_mask_epoch": 282,
+  "best_mask_map": 0.80303,
+  "final_epoch": 300,
+  "final_box_map": 0.81455,
+  "final_mask_map": 0.80208
+}

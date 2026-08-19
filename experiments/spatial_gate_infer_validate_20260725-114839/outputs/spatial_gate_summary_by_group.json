@@ -1,0 +1,800 @@
+{
+  "csv": "D:\\Graduate\\project\\genye\\experiments\\spatial_gate_infer_validate_20260725-114839\\outputs\\spatial_gate_rgb_depth_weights.csv",
+  "image_dir": "D:\\Graduate\\project\\genye\\Dataset\\xinjiang_1500_baoguang\\images\\val_ab",
+  "total_rows": 1641,
+  "total_images": 547,
+  "group_counts": {
+    "normal": 300,
+    "overexposed": 247
+  },
+  "modules": {
+    "model.36.coord_att": {
+      "normal": {
+        "n": 300,
+        "spatial_illum_src_alpha": {
+          "mean": 0.9686576771736145,
+          "std": 0.003692522872047132,
+          "min": 0.9583303332328796,
+          "p10": 0.9634892344474792,
+          "p50": 0.96905118227005,
+          "p90": 0.9734089374542236,
+          "max": 0.9753362536430359
+        },
+        "spatial_illum_depth_1_minus_alpha": {
+          "mean": 0.031342323490728935,
+          "std": 0.0036925237197031665,
+          "min": 0.024663714691996574,
+          "p10": 0.026590948924422264,
+          "p50": 0.03100436180830002,
+          "p90": 0.03651072457432747,
+          "max": 0.041669704020023346
+        },
+        "local_src_alpha_min": {
+          "mean": 0.4161810355136792,
+          "std": 0.10109820026653413,
+          "min": 0.12345253676176071,
+          "p10": 0.29034164547920227,
+          "p50": 0.41536813974380493,
+          "p90": 0.5597333908081055,
+          "max": 0.64823317527771
+        },
+        "local_src_alpha_max": {
+          "mean": 0.9983874956766764,
+          "std": 0.0006712515683424102,
+          "min": 0.9962124824523926,
+          "p10": 0.9974678754806519,
+          "p50": 0.9984713196754456,
+          "p90": 0.999158501625061,
+          "max": 0.9998524188995361
+        },
+        "learnable_blend_base": {
+          "mean": 0.5456488728523254,
+          "std": 0.0,
+          "min": 0.5456488728523254,
+          "p10": 0.5456488728523254,
+          "p50": 0.5456488728523254,
+          "p90": 0.5456488728523254,
+          "max": 0.5456488728523254
+        },
+        "learnable_blend_out": {
+          "mean": 0.4543510973453522,
+          "std": 0.0,
+          "min": 0.4543510973453522,
+          "p10": 0.4543510973453522,
+          "p50": 0.4543510973453522,
+          "p90": 0.4543510973453522,
+          "max": 0.4543510973453522
+        },
+        "brightness_mean": {
+          "mean": 0.18099367777506511,
+          "std": 0.019953203168035127,
+          "min": 0.1265614926815033,
+          "p10": 0.1612560898065567,
+          "p50": 0.1775227040052414,
+          "p90": 0.20734994113445282,
+          "max": 0.279580295085907
+        },
+        "over088_ratio": {
+          "mean": 0.024533723958333333,
+          "std": 0.01871421156418463,
+          "min": 0.005615234375,
+          "p10": 0.009475911458333333,
+          "p50": 0.018772786458333333,
+          "p90": 0.048434244791666664,
+          "max": 0.12912109375
+        }
+      },
+      "overexposed": {
+        "n": 247,
+        "spatial_illum_src_alpha": {
+          "mean": 0.9698114006625496,
+          "std": 0.0033202998670753612,
+          "min": 0.9590888023376465,
+          "p10": 0.9656029343605042,
+          "p50": 0.9700177907943726,
+          "p90": 0.9740142226219177,
+          "max": 0.9755900502204895
+        },
+        "spatial_illum_depth_1_minus_alpha": {
+          "mean": 0.03018859834956978,
+          "std": 0.0033203014846512145,
+          "min": 0.024409949779510498,
+          "p10": 0.025985736399888992,
+          "p50": 0.029982175678014755,
+          "p90": 0.034397002309560776,
+          "max": 0.040911249816417694
+        },
+        "local_src_alpha_min": {
+          "mean": 0.4433991302121506,
+          "std": 0.10312549512767452,
+          "min": 0.1564137041568756,
+          "p10": 0.31350257992744446,
+          "p50": 0.43668922781944275,
+          "p90": 0.5808003544807434,
+          "max": 0.6624370217323303
+        },
+        "local_src_alpha_max": {
+          "mean": 0.9985250210472447,
+          "std": 0.0006420146396066688,
+          "min": 0.9965022802352905,
+          "p10": 0.9976317882537842,
+          "p50": 0.9985916018486023,
+          "p90": 0.9992840886116028,
+          "max": 0.9998270869255066
+        },
+        "learnable_blend_base": {
+          "mean": 0.5456488728523254,
+          "std": 0.0,
+          "min": 0.5456488728523254,
+          "p10": 0.5456488728523254,
+          "p50": 0.5456488728523254,
+          "p90": 0.5456488728523254,
+          "max": 0.5456488728523254
+        },
+        "learnable_blend_out": {
+          "mean": 0.4543510973453522,
+          "std": 0.0,
+          "min": 0.4543510973453522,
+          "p10": 0.4543510973453522,
+          "p50": 0.4543510973453522,
+          "p90": 0.4543510973453522,
+          "max": 0.4543510973453522
+        },
+        "brightness_mean": {
+          "mean": 0.19403532316327576,
+          "std": 0.024335393517639567,
+          "min": 0.12961669266223907,
+          "p10": 0.16924962401390076,
+          "p50": 0.18912360072135925,
+          "p90": 0.22212104499340057,
+          "max": 0.3284423053264618
+        },
+        "over088_ratio": {
+          "mean": 0.0402905569964575,
+          "std": 0.02617016846417197,
+          "min": 0.011302083333333334,
+          "p10": 0.016510416666666666,
+          "p50": 0.032210286458333334,
+          "p90": 0.07541666666666667,
+          "max": 0.21947916666666667
+        }
+      },
+      "overexposed_minus_normal": {
+        "src_alpha_mean_delta": 0.0011537234889350545,
+        "depth_weight_mean_delta": -0.001153725141159155,
+        "over088_ratio_delta": 0.015756833038124165
+      },
+      "correlations": {
+        "brightness_vs_src_alpha": 0.0033450860484395667,
+        "over088_ratio_vs_src_alpha": 0.0983290721084783,
+        "over088_ratio_vs_depth_weight": -0.09832992910550956
+      }
+    },
+    "model.37.coord_att": {
+      "normal": {
+        "n": 300,
+        "spatial_illum_src_alpha": {
+          "mean": 0.8557375858227412,
+          "std": 0.01024436538446888,
+          "min": 0.8239622712135315,
+          "p10": 0.8430439829826355,
+          "p50": 0.8560627698898315,
+          "p90": 0.8679466247558594,
+          "max": 0.8849399089813232
+        },
+        "spatial_illum_depth_1_minus_alpha": {
+          "mean": 0.14426241278648377,
+          "std": 0.010244363526780003,
+          "min": 0.11506006121635437,
+          "p10": 0.13205333054065704,
+          "p50": 0.14395347237586975,
+          "p90": 0.15695594251155853,
+          "max": 0.17603766918182373
+        },
+        "local_src_alpha_min": {
+          "mean": 0.35526772746195395,
+          "std": 0.12988916346672236,
+          "min": 0.04929008707404137,
+          "p10": 0.18655766546726227,
+          "p50": 0.360383003950119,
+          "p90": 0.533442497253418,
+          "max": 0.6874632835388184
+        },
+        "local_src_alpha_max": {
+          "mean": 0.9817621825138728,
+          "std": 0.005150954030600067,
+          "min": 0.9655200242996216,
+          "p10": 0.9751783609390259,
+          "p50": 0.9819544553756714,
+          "p90": 0.9883078932762146,
+          "max": 0.9957870841026306
+        },
+        "learnable_blend_base": {
+          "mean": 0.5461330413818359,
+          "std": 0.0,
+          "min": 0.5461330413818359,
+          "p10": 0.5461330413818359,
+          "p50": 0.5461330413818359,
+          "p90": 0.5461330413818359,
+          "max": 0.5461330413818359
+        },
+        "learnable_blend_out": {
+          "mean": 0.4538668990135193,
+          "std": 0.0,
+          "min": 0.4538668990135193,
+          "p10": 0.4538668990135193,
+          "p50": 0.4538668990135193,
+          "p90": 0.4538668990135193,
+          "max": 0.4538668990135193
+        },
+        "brightness_mean": {
+          "mean": 0.18099367777506511,
+          "std": 0.019953203168035127,
+          "min": 0.1265614926815033,
+          "p10": 0.1612560898065567,
+          "p50": 0.1775227040052414,
+          "p90": 0.20734994113445282,
+          "max": 0.279580295085907
+        },
+        "over088_ratio": {
+          "mean": 0.024533723958333333,
+          "std": 0.01871421156418463,
+          "min": 0.005615234375,
+          "p10": 0.009475911458333333,
+          "p50": 0.018772786458333333,
+          "p90": 0.048434244791666664,
+          "max": 0.12912109375
+        }
+      },
+      "overexposed": {
+        "n": 247,
+        "spatial_illum_src_alpha": {
+          "mean": 0.857727404548089,
+          "std": 0.00938101547609929,
+          "min": 0.8320903182029724,
+          "p10": 0.8462026715278625,
+          "p50": 0.8574585914611816,
+          "p90": 0.8689311146736145,
+          "max": 0.8848239183425903
+        },
+        "spatial_illum_depth_1_minus_alpha": {
+          "mean": 0.14227259686963278,
+          "std": 0.009381016424477149,
+          "min": 0.11517608910799026,
+          "p10": 0.1310689002275467,
+          "p50": 0.14254136383533478,
+          "p90": 0.1537972390651703,
+          "max": 0.16790969669818878
+        },
+        "local_src_alpha_min": {
+          "mean": 0.3795914574854287,
+          "std": 0.13112992743171184,
+          "min": 0.10721874237060547,
+          "p10": 0.20233489573001862,
+          "p50": 0.40052175521850586,
+          "p90": 0.5431169271469116,
+          "max": 0.661163866519928
+        },
+        "local_src_alpha_max": {
+          "mean": 0.9821664789910258,
+          "std": 0.005058144449651861,
+          "min": 0.9666048884391785,
+          "p10": 0.9756535887718201,
+          "p50": 0.9824168682098389,
+          "p90": 0.988438069820404,
+          "max": 0.9957314133644104
+        },
+        "learnable_blend_base": {
+          "mean": 0.5461330413818359,
+          "std": 0.0,
+          "min": 0.5461330413818359,
+          "p10": 0.5461330413818359,
+          "p50": 0.5461330413818359,
+          "p90": 0.5461330413818359,
+          "max": 0.5461330413818359
+        },
+        "learnable_blend_out": {
+          "mean": 0.4538668990135193,
+          "std": 0.0,
+          "min": 0.4538668990135193,
+          "p10": 0.4538668990135193,
+          "p50": 0.4538668990135193,
+          "p90": 0.4538668990135193,
+          "max": 0.4538668990135193
+        },
+        "brightness_mean": {
+          "mean": 0.19403532316327576,
+          "std": 0.024335393517639567,
+          "min": 0.12961669266223907,
+          "p10": 0.16924962401390076,
+          "p50": 0.18912360072135925,
+          "p90": 0.22212104499340057,
+          "max": 0.3284423053264618
+        },
+        "over088_ratio": {
+          "mean": 0.0402905569964575,
+          "std": 0.02617016846417197,
+          "min": 0.011302083333333334,
+          "p10": 0.016510416666666666,
+          "p50": 0.032210286458333334,
+          "p90": 0.07541666666666667,
+          "max": 0.21947916666666667
+        }
+      },
+      "overexposed_minus_normal": {
+        "src_alpha_mean_delta": 0.0019898187253478694,
+        "depth_weight_mean_delta": -0.00198981591685099,
+        "over088_ratio_delta": 0.015756833038124165
+      },
+      "correlations": {
+        "brightness_vs_src_alpha": -0.04644948046841426,
+        "over088_ratio_vs_src_alpha": 0.05222845550116708,
+        "over088_ratio_vs_depth_weight": -0.052228473020571285
+      }
+    },
+    "model.38.coord_att": {
+      "normal": {
+        "n": 300,
+        "spatial_illum_src_alpha": {
+          "mean": 0.7070998128255208,
+          "std": 0.02558293096049898,
+          "min": 0.6359895467758179,
+          "p10": 0.6741635203361511,
+          "p50": 0.7083258628845215,
+          "p90": 0.7402766346931458,
+          "max": 0.7781394124031067
+        },
+        "spatial_illum_depth_1_minus_alpha": {
+          "mean": 0.2929001865287622,
+          "std": 0.025582930830745972,
+          "min": 0.2218605875968933,
+          "p10": 0.2597233057022095,
+          "p50": 0.29192444682121277,
+          "p90": 0.3258364498615265,
+          "max": 0.36401042342185974
+        },
+        "local_src_alpha_min": {
+          "mean": 0.28951397081216174,
+          "std": 0.06888101765005303,
+          "min": 0.08061375468969345,
+          "p10": 0.20419172942638397,
+          "p50": 0.2927805483341217,
+          "p90": 0.370080828666687,
+          "max": 0.4931126832962036
+        },
+        "local_src_alpha_max": {
+          "mean": 0.9477727768818537,
+          "std": 0.018692591394679645,
+          "min": 0.8874489068984985,
+          "p10": 0.9213768243789673,
+          "p50": 0.9490296840667725,
+          "p90": 0.9705604314804077,
+          "max": 0.9885817170143127
+        },
+        "learnable_blend_base": {
+          "mean": 0.45556193590164185,
+          "std": 0.0,
+          "min": 0.45556193590164185,
+          "p10": 0.45556193590164185,
+          "p50": 0.45556193590164185,
+          "p90": 0.45556193590164185,
+          "max": 0.45556193590164185
+        },
+        "learnable_blend_out": {
+          "mean": 0.5444381237030029,
+          "std": 0.0,
+          "min": 0.5444381237030029,
+          "p10": 0.5444381237030029,
+          "p50": 0.5444381237030029,
+          "p90": 0.5444381237030029,
+          "max": 0.5444381237030029
+        },
+        "brightness_mean": {
+          "mean": 0.18099367777506511,
+          "std": 0.019953203168035127,
+          "min": 0.1265614926815033,
+          "p10": 0.1612560898065567,
+          "p50": 0.1775227040052414,
+          "p90": 0.20734994113445282,
+          "max": 0.279580295085907
+        },
+        "over088_ratio": {
+          "mean": 0.024533723958333333,
+          "std": 0.01871421156418463,
+          "min": 0.005615234375,
+          "p10": 0.009475911458333333,
+          "p50": 0.018772786458333333,
+          "p90": 0.048434244791666664,
+          "max": 0.12912109375
+        }
+      },
+      "overexposed": {
+        "n": 247,
+        "spatial_illum_src_alpha": {
+          "mean": 0.7081681398245004,
+          "std": 0.02489813912381764,
+          "min": 0.6362388730049133,
+          "p10": 0.6736204624176025,
+          "p50": 0.709486722946167,
+          "p90": 0.7418256998062134,
+          "max": 0.7719930410385132
+        },
+        "spatial_illum_depth_1_minus_alpha": {
+          "mean": 0.2918318616837142,
+          "std": 0.02489813633689045,
+          "min": 0.22800695896148682,
+          "p10": 0.25817424058914185,
+          "p50": 0.2905132472515106,
+          "p90": 0.32637953758239746,
+          "max": 0.3637610673904419
+        },
+        "local_src_alpha_min": {
+          "mean": 0.291353765045583,
+          "std": 0.06990624437612257,
+          "min": 0.07772767543792725,
+          "p10": 0.20687676966190338,
+          "p50": 0.2947394847869873,
+          "p90": 0.3701306879520416,
+          "max": 0.4947138726711273
+        },
+        "local_src_alpha_max": {
+          "mean": 0.9458165586236035,
+          "std": 0.01867804055975484,
+          "min": 0.894396185874939,
+          "p10": 0.921713650226593,
+          "p50": 0.9469445943832397,
+          "p90": 0.9700837135314941,
+          "max": 0.9832484722137451
+        },
+        "learnable_blend_base": {
+          "mean": 0.45556193590164185,
+          "std": 0.0,
+          "min": 0.45556193590164185,
+          "p10": 0.45556193590164185,
+          "p50": 0.45556193590164185,
+          "p90": 0.45556193590164185,
+          "max": 0.45556193590164185
+        },
+        "learnable_blend_out": {
+          "mean": 0.5444381237030029,
+          "std": 0.0,
+          "min": 0.5444381237030029,
+          "p10": 0.5444381237030029,
+          "p50": 0.5444381237030029,
+          "p90": 0.5444381237030029,
+          "max": 0.5444381237030029
+        },
+        "brightness_mean": {
+          "mean": 0.19403532316327576,
+          "std": 0.024335393517639567,
+          "min": 0.12961669266223907,
+          "p10": 0.16924962401390076,
+          "p50": 0.18912360072135925,
+          "p90": 0.22212104499340057,
+          "max": 0.3284423053264618
+        },
+        "over088_ratio": {
+          "mean": 0.0402905569964575,
+          "std": 0.02617016846417197,
+          "min": 0.011302083333333334,
+          "p10": 0.016510416666666666,
+          "p50": 0.032210286458333334,
+          "p90": 0.07541666666666667,
+          "max": 0.21947916666666667
+        }
+      },
+      "overexposed_minus_normal": {
+        "src_alpha_mean_delta": 0.0010683269989796296,
+        "depth_weight_mean_delta": -0.0010683248450479854,
+        "over088_ratio_delta": 0.015756833038124165
+      },
+      "correlations": {
+        "brightness_vs_src_alpha": -0.21996125535593192,
+        "over088_ratio_vs_src_alpha": -0.04258172737964638,
+        "over088_ratio_vs_depth_weight": 0.04258167428835909
+      }
+    }
+  },
+  "paired_overexposure_summary": {
+    "model.36.coord_att": {
+      "n_pairs": 247,
+      "src_alpha_delta": {
+        "mean": 0.0007498051956114981,
+        "p10": 0.00016880035400390625,
+        "p50": 0.0004692673683166504,
+        "p90": 0.0017805099487304688,
+        "fraction_src_decreased_on_overexposure": 0.008097165991902834
+      },
+      "depth_delta": {
+        "mean": -0.0007498066133333121,
+        "p10": -0.0017804503440856934,
+        "p50": -0.00046935491263866425,
+        "p90": -0.00016877055168151855,
+        "fraction_depth_increased_on_overexposure": 0.008097165991902834
+      },
+      "corr_over088_delta_vs_src_delta": 0.7078546912387863,
+      "largest_depth_increase_examples": [
+        {
+          "base_stem": "622_xinjiang_IMG_0046_20260519033439381",
+          "src_alpha_delta_over_minus_normal": -0.000102996826171875,
+          "depth_delta_over_minus_normal": 0.000102996826171875,
+          "over088_delta": 0.028515624999999996,
+          "normal_image": "622_xinjiang_IMG_0046_20260519033439381.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0046_20260519033439381_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0203_20260531050834352",
+          "src_alpha_delta_over_minus_normal": -5.185604095458984e-06,
+          "depth_delta_over_minus_normal": 5.161389708518982e-06,
+          "over088_delta": 0.05067057291666666,
+          "normal_image": "622_xinjiang_IMG_0203_20260531050834352.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0203_20260531050834352_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0007_20260519031052562",
+          "src_alpha_delta_over_minus_normal": 1.811981201171875e-05,
+          "depth_delta_over_minus_normal": -1.80806964635849e-05,
+          "over088_delta": 0.015475260416666668,
+          "normal_image": "622_xinjiang_IMG_0007_20260519031052562.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0007_20260519031052562_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0089_20260519033221869",
+          "src_alpha_delta_over_minus_normal": 7.587671279907227e-05,
+          "depth_delta_over_minus_normal": -7.572397589683533e-05,
+          "over088_delta": 0.006650390624999999,
+          "normal_image": "622_xinjiang_IMG_0089_20260519033221869.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0089_20260519033221869_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0033_20260519034407035",
+          "src_alpha_delta_over_minus_normal": 8.809566497802734e-05,
+          "depth_delta_over_minus_normal": -8.817017078399658e-05,
+          "over088_delta": 0.00045247395833333294,
+          "normal_image": "622_xinjiang_IMG_0033_20260519034407035.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0033_20260519034407035_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0116_20260602034041857",
+          "src_alpha_delta_over_minus_normal": 9.08970832824707e-05,
+          "depth_delta_over_minus_normal": -9.091757237911224e-05,
+          "over088_delta": 0.02569010416666667,
+          "normal_image": "622_xinjiang_IMG_0116_20260602034041857.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0116_20260602034041857_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0049_20260519031144668",
+          "src_alpha_delta_over_minus_normal": 9.351968765258789e-05,
+          "depth_delta_over_minus_normal": -9.34898853302002e-05,
+          "over088_delta": 0.005107421875,
+          "normal_image": "622_xinjiang_IMG_0049_20260519031144668.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0049_20260519031144668_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0035_20260601202014327",
+          "src_alpha_delta_over_minus_normal": 0.0001087188720703125,
+          "depth_delta_over_minus_normal": -0.00010874681174755096,
+          "over088_delta": 0.002070312500000001,
+          "normal_image": "622_xinjiang_IMG_0035_20260601202014327.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0035_20260601202014327_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0083_20260519033928418",
+          "src_alpha_delta_over_minus_normal": 0.00011533498764038086,
+          "depth_delta_over_minus_normal": -0.00011529587209224701,
+          "over088_delta": 0.0006966145833333347,
+          "normal_image": "622_xinjiang_IMG_0083_20260519033928418.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0083_20260519033928418_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0211_20260531180451857",
+          "src_alpha_delta_over_minus_normal": 0.00012123584747314453,
+          "depth_delta_over_minus_normal": -0.00012126192450523376,
+          "over088_delta": 0.0008528645833333331,
+          "normal_image": "622_xinjiang_IMG_0211_20260531180451857.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0211_20260531180451857_realexp.jpg"
+        }
+      ]
+    },
+    "model.37.coord_att": {
+      "n_pairs": 247,
+      "src_alpha_delta": {
+        "mean": 0.0007184946585280693,
+        "p10": -0.0001303553581237793,
+        "p50": 0.000508427619934082,
+        "p90": 0.001910090446472168,
+        "fraction_src_decreased_on_overexposure": 0.13765182186234817
+      },
+      "depth_delta": {
+        "mean": -0.0007184952316496537,
+        "p10": -0.001910179853439331,
+        "p50": -0.0005083978176116943,
+        "p90": 0.00013045966625213623,
+        "fraction_depth_increased_on_overexposure": 0.13765182186234817
+      },
+      "corr_over088_delta_vs_src_delta": 0.1808625314285584,
+      "largest_depth_increase_examples": [
+        {
+          "base_stem": "622_xinjiang_IMG_0344_20260531183815674",
+          "src_alpha_delta_over_minus_normal": -0.002045750617980957,
+          "depth_delta_over_minus_normal": 0.0020457953214645386,
+          "over088_delta": 0.09035807291666667,
+          "normal_image": "622_xinjiang_IMG_0344_20260531183815674.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0344_20260531183815674_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0304_20260531201212706",
+          "src_alpha_delta_over_minus_normal": -0.0018206238746643066,
+          "depth_delta_over_minus_normal": 0.0018206238746643066,
+          "over088_delta": 0.06543945312499999,
+          "normal_image": "622_xinjiang_IMG_0304_20260531201212706.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0304_20260531201212706_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0116_20260519035258406",
+          "src_alpha_delta_over_minus_normal": -0.0016451478004455566,
+          "depth_delta_over_minus_normal": 0.0016451478004455566,
+          "over088_delta": 0.013935546875,
+          "normal_image": "622_xinjiang_IMG_0116_20260519035258406.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0116_20260519035258406_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0079_20260519031013487",
+          "src_alpha_delta_over_minus_normal": -0.0010457038879394531,
+          "depth_delta_over_minus_normal": 0.00104561448097229,
+          "over088_delta": 0.014365234375,
+          "normal_image": "622_xinjiang_IMG_0079_20260519031013487.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0079_20260519031013487_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0241_20260531194600986",
+          "src_alpha_delta_over_minus_normal": -0.0010280609130859375,
+          "depth_delta_over_minus_normal": 0.0010280311107635498,
+          "over088_delta": 0.0025813802083333327,
+          "normal_image": "622_xinjiang_IMG_0241_20260531194600986.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0241_20260531194600986_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0091_20260519032117963",
+          "src_alpha_delta_over_minus_normal": -0.0009958148002624512,
+          "depth_delta_over_minus_normal": 0.0009957849979400635,
+          "over088_delta": 0.016888020833333336,
+          "normal_image": "622_xinjiang_IMG_0091_20260519032117963.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0091_20260519032117963_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0155_20260519052609412",
+          "src_alpha_delta_over_minus_normal": -0.000989377498626709,
+          "depth_delta_over_minus_normal": 0.0009893476963043213,
+          "over088_delta": 0.031767578125,
+          "normal_image": "622_xinjiang_IMG_0155_20260519052609412.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0155_20260519052609412_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0076_20260519032647937",
+          "src_alpha_delta_over_minus_normal": -0.0008387565612792969,
+          "depth_delta_over_minus_normal": 0.0008388161659240723,
+          "over088_delta": 0.020592447916666663,
+          "normal_image": "622_xinjiang_IMG_0076_20260519032647937.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0076_20260519032647937_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0052_20260601221141034",
+          "src_alpha_delta_over_minus_normal": -0.0008050799369812012,
+          "depth_delta_over_minus_normal": 0.0008051544427871704,
+          "over088_delta": 0.022652994791666665,
+          "normal_image": "622_xinjiang_IMG_0052_20260601221141034.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0052_20260601221141034_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0057_20260519034409793",
+          "src_alpha_delta_over_minus_normal": -0.0007982254028320312,
+          "depth_delta_over_minus_normal": 0.0007980912923812866,
+          "over088_delta": 0.012216796875000005,
+          "normal_image": "622_xinjiang_IMG_0057_20260519034409793.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0057_20260519034409793_realexp.jpg"
+        }
+      ]
+    },
+    "model.38.coord_att": {
+      "n_pairs": 247,
+      "src_alpha_delta": {
+        "mean": -0.0002588523544280635,
+        "p10": -0.005391240119934082,
+        "p50": -5.513429641723633e-05,
+        "p90": 0.004797101020812988,
+        "fraction_src_decreased_on_overexposure": 0.5060728744939271
+      },
+      "depth_delta": {
+        "mean": 0.00025885247508523917,
+        "p10": -0.004797041416168213,
+        "p50": 5.498528480529785e-05,
+        "p90": 0.005391210317611694,
+        "fraction_depth_increased_on_overexposure": 0.5060728744939271
+      },
+      "corr_over088_delta_vs_src_delta": 0.044436211903434115,
+      "largest_depth_increase_examples": [
+        {
+          "base_stem": "622_xinjiang_IMG_0363_20260531183024288",
+          "src_alpha_delta_over_minus_normal": -0.01518106460571289,
+          "depth_delta_over_minus_normal": 0.015181005001068115,
+          "over088_delta": 0.0011490885416666659,
+          "normal_image": "622_xinjiang_IMG_0363_20260531183024288.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0363_20260531183024288_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0057_20260519034544769",
+          "src_alpha_delta_over_minus_normal": -0.015118002891540527,
+          "depth_delta_over_minus_normal": 0.01511809229850769,
+          "over088_delta": 0.03251627604166667,
+          "normal_image": "622_xinjiang_IMG_0057_20260519034544769.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0057_20260519034544769_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0354_20260519201859623",
+          "src_alpha_delta_over_minus_normal": -0.01449650526046753,
+          "depth_delta_over_minus_normal": 0.01449662446975708,
+          "over088_delta": 0.004687499999999997,
+          "normal_image": "622_xinjiang_IMG_0354_20260519201859623.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0354_20260519201859623_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0076_20260519030528237",
+          "src_alpha_delta_over_minus_normal": -0.014299154281616211,
+          "depth_delta_over_minus_normal": 0.014299094676971436,
+          "over088_delta": 0.030904947916666665,
+          "normal_image": "622_xinjiang_IMG_0076_20260519030528237.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0076_20260519030528237_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0302_20260519190749367",
+          "src_alpha_delta_over_minus_normal": -0.012928009033203125,
+          "depth_delta_over_minus_normal": 0.012927994132041931,
+          "over088_delta": 0.004153645833333337,
+          "normal_image": "622_xinjiang_IMG_0302_20260519190749367.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0302_20260519190749367_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0005_20260602202800435",
+          "src_alpha_delta_over_minus_normal": -0.010876834392547607,
+          "depth_delta_over_minus_normal": 0.010876715183258057,
+          "over088_delta": 0.023681640625000003,
+          "normal_image": "622_xinjiang_IMG_0005_20260602202800435.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0005_20260602202800435_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0116_20260519034416561",
+          "src_alpha_delta_over_minus_normal": -0.010194897651672363,
+          "depth_delta_over_minus_normal": 0.010194927453994751,
+          "over088_delta": 0.034550781249999996,
+          "normal_image": "622_xinjiang_IMG_0116_20260519034416561.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0116_20260519034416561_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0031_20260519032642832",
+          "src_alpha_delta_over_minus_normal": -0.00985252857208252,
+          "depth_delta_over_minus_normal": 0.009852498769760132,
+          "over088_delta": 0.05935546875000001,
+          "normal_image": "622_xinjiang_IMG_0031_20260519032642832.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0031_20260519032642832_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0033_20260519033612913",
+          "src_alpha_delta_over_minus_normal": -0.00968390703201294,
+          "depth_delta_over_minus_normal": 0.00968390703201294,
+          "over088_delta": 0.022402343750000005,
+          "normal_image": "622_xinjiang_IMG_0033_20260519033612913.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0033_20260519033612913_realexp.jpg"
+        },
+        {
+          "base_stem": "622_xinjiang_IMG_0244_20260531050704683",
+          "src_alpha_delta_over_minus_normal": -0.008640408515930176,
+          "depth_delta_over_minus_normal": 0.008640497922897339,
+          "over088_delta": 0.0006022135416666671,
+          "normal_image": "622_xinjiang_IMG_0244_20260531050704683.jpg",
+          "overexposed_image": "622_xinjiang_IMG_0244_20260531050704683_realexp.jpg"
+        }
+      ]
+    }
+  }
+}

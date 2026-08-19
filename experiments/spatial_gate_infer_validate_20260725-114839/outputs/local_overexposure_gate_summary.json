@@ -1,0 +1,50 @@
+{
+  "model.36.coord_att/normal": {
+    "n": 235,
+    "over_mask_ratio_mean": 0.01663297872340426,
+    "inside_minus_outside_src_mean": -0.035545927920240035,
+    "inside_minus_outside_depth_mean": 0.035545927920240035,
+    "fraction_inside_src_lower": 0.9744680851063829,
+    "corr_mask_ratio_vs_inside_src_delta": 0.39378473945206716
+  },
+  "model.37.coord_att/normal": {
+    "n": 172,
+    "over_mask_ratio_mean": 0.01593386627906977,
+    "inside_minus_outside_src_mean": -0.025160645676213643,
+    "inside_minus_outside_depth_mean": 0.025160645676213643,
+    "fraction_inside_src_lower": 0.6395348837209303,
+    "corr_mask_ratio_vs_inside_src_delta": -0.2906601969501643
+  },
+  "model.36.coord_att/overexposed": {
+    "n": 243,
+    "over_mask_ratio_mean": 0.025491898148148163,
+    "inside_minus_outside_src_mean": -0.021269807109126338,
+    "inside_minus_outside_depth_mean": 0.021269807109126338,
+    "fraction_inside_src_lower": 0.9465020576131687,
+    "corr_mask_ratio_vs_inside_src_delta": 0.31710888418927186
+  },
+  "model.37.coord_att/overexposed": {
+    "n": 222,
+    "over_mask_ratio_mean": 0.022378941441441445,
+    "inside_minus_outside_src_mean": -0.021319264227205568,
+    "inside_minus_outside_depth_mean": 0.021319264227205568,
+    "fraction_inside_src_lower": 0.6306306306306306,
+    "corr_mask_ratio_vs_inside_src_delta": -0.23481973761078181
+  },
+  "model.38.coord_att/overexposed": {
+    "n": 183,
+    "over_mask_ratio_mean": 0.018415300546448077,
+    "inside_minus_outside_src_mean": -0.10799065818552112,
+    "inside_minus_outside_depth_mean": 0.10799065818552112,
+    "fraction_inside_src_lower": 0.8469945355191257,
+    "corr_mask_ratio_vs_inside_src_delta": 0.06746516598635056
+  },
+  "model.38.coord_att/normal": {
+    "n": 114,
+    "over_mask_ratio_mean": 0.014714912280701743,
+    "inside_minus_outside_src_mean": -0.08385961515861645,
+    "inside_minus_outside_depth_mean": 0.08385961515861645,
+    "fraction_inside_src_lower": 0.7543859649122807,
+    "corr_mask_ratio_vs_inside_src_delta": 0.008174727813308939
+  }
+}

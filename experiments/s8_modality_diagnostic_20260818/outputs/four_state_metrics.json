@@ -1,0 +1,108 @@
+{
+  "experiment": "s8_modality_diagnostic_20260818",
+  "weights": "D:\\Graduate\\project\\genye\\YOLOv11-RGB-D-coord_attv2-genye\\coord_attv2-s8\\weights\\best.pt",
+  "data": "D:\\Graduate\\project\\genye\\experiments\\s8_modality_diagnostic_20260818\\data_3cls_local.yaml",
+  "imgsz": 640,
+  "batch": 8,
+  "device": "0",
+  "workers": 0,
+  "conf": 0.001,
+  "iou": 0.7,
+  "fusion_indices": [
+    36,
+    37,
+    38
+  ],
+  "modes": {
+    "RD": {
+      "mode": "RD",
+      "rgb_lambda": 1.0,
+      "depth_lambda": 1.0,
+      "box_precision": 0.431301,
+      "box_recall": 0.426227,
+      "box_map50": 0.391141,
+      "box_map": 0.326619,
+      "mask_precision": 0.434738,
+      "mask_recall": 0.427337,
+      "mask_map50": 0.390471,
+      "mask_map": 0.313685
+    },
+    "R-only": {
+      "mode": "R-only",
+      "rgb_lambda": 1.0,
+      "depth_lambda": 0.0,
+      "box_precision": 0.414087,
+      "box_recall": 0.299215,
+      "box_map50": 0.299745,
+      "box_map": 0.239797,
+      "mask_precision": 0.416675,
+      "mask_recall": 0.2988,
+      "mask_map50": 0.299863,
+      "mask_map": 0.233229
+    },
+    "D-only": {
+      "mode": "D-only",
+      "rgb_lambda": 0.0,
+      "depth_lambda": 1.0,
+      "box_precision": 0.471614,
+      "box_recall": 0.107403,
+      "box_map50": 0.280861,
+      "box_map": 0.128825,
+      "mask_precision": 0.239659,
+      "mask_recall": 0.100102,
+      "mask_map50": 0.160994,
+      "mask_map": 0.075745
+    },
+    "Empty": {
+      "mode": "Empty",
+      "rgb_lambda": 0.0,
+      "depth_lambda": 0.0,
+      "box_precision": 0.0,
+      "box_recall": 0.0,
+      "box_map50": 0.0,
+      "box_map": 0.0,
+      "mask_precision": 0.0,
+      "mask_recall": 0.0,
+      "mask_map50": 0.0,
+      "mask_map": 0.0
+    }
+  },
+  "shapley": [
+    {
+      "metric": "box_map",
+      "rgb_contribution": 0.218796,
+      "depth_contribution": 0.107823,
+      "rgb_ratio": 0.66988,
+      "depth_ratio": 0.33012,
+      "interaction": -0.042003,
+      "efficiency_check": 0.0
+    },
+    {
+      "metric": "box_map50",
+      "rgb_contribution": 0.205012,
+      "depth_contribution": 0.186129,
+      "rgb_ratio": 0.52414,
+      "depth_ratio": 0.47586,
+      "interaction": -0.189465,
+      "efficiency_check": 0.0
+    },
+    {
+      "metric": "mask_map",
+      "rgb_contribution": 0.235584,
+      "depth_contribution": 0.078101,
+      "rgb_ratio": 0.751023,
+      "depth_ratio": 0.248977,
+      "interaction": 0.004711,
+      "efficiency_check": 0.0
+    },
+    {
+      "metric": "mask_map50",
+      "rgb_contribution": 0.26467,
+      "depth_contribution": 0.125801,
+      "rgb_ratio": 0.677822,
+      "depth_ratio": 0.322178,
+      "interaction": -0.070386,
+      "efficiency_check": 0.0
+    }
+  ]
+}

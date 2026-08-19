@@ -1,0 +1,16 @@
+{
+  "dataset": "D:\\Graduate\\project\\genye\\Dataset\\xinjiang_1500_baoguang",
+  "model_yaml": "D:\\Graduate\\project\\genye\\configs\\yolo11-seg-spatialillum-learnblend-auxoff-xinjiang1500.yaml",
+  "weights": "D:\\Graduate\\project\\genye\\YOLOv11-RGB-D-coord_attv2-genye\\xinjiang_1500_experiments\\xinjiang_1500_baoguang_from_coordattv2s8_lr001-spillum-learnblend-auxoff-3gpu_b36-seed20260702\\weights\\best.pt",
+  "split": "val_ab",
+  "imgsz": 640,
+  "device": "0",
+  "data_yaml": "D:\\Graduate\\project\\genye\\experiments\\spatial_gate_infer_validate_20260725-114839\\outputs\\data_3cls_windows_rgbd.yaml",
+  "num_pairs_checked": 547,
+  "num_gate_rows": 1641,
+  "group_counts": {
+    "normal": 300,
+    "overexposed": 247
+  },
+  "gate_csv": "D:\\Graduate\\project\\genye\\experiments\\spatial_gate_infer_validate_20260725-114839\\outputs\\spatial_gate_rgb_depth_weights.csv"
+}

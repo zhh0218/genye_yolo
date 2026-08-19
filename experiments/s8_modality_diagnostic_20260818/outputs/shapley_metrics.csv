@@ -1,0 +1,5 @@
+depth_contribution,depth_ratio,efficiency_check,interaction,metric,rgb_contribution,rgb_ratio
+0.107823,0.33012,0.0,-0.042003,box_map,0.218796,0.66988
+0.186129,0.47586,0.0,-0.189465,box_map50,0.205012,0.52414
+0.078101,0.248977,0.0,0.004711,mask_map,0.235584,0.751023
+0.125801,0.322178,0.0,-0.070386,mask_map50,0.26467,0.677822

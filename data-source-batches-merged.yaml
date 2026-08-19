@@ -1,0 +1,9 @@
+# RGB-D source batch validation set adapted for YOLO11 RGB-D loader.
+train: /workspace/Datasets/source_batches_merged_yolo11/images/val
+val: /workspace/Datasets/source_batches_merged_yolo11/images/val
+test: /workspace/Datasets/source_batches_merged_yolo11/images/val
+
+nc: 2
+names:
+  0: 00
+  1: 01

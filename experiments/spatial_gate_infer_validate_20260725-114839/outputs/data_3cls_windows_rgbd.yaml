@@ -1,0 +1,12 @@
+path: D:/Graduate/project/genye/Dataset/xinjiang_1500_baoguang
+train: images/train
+val: images/val
+test: images/val
+depth_train: depth/train
+depth_val: depth/val
+depth_test: depth/val
+nc: 3
+names:
+  0: '00'
+  1: '01'
+  2: '10'
