@@ -65,13 +65,15 @@ def make_validator(model_name, blend_rows, alpha_rows_holder):
                     blend = [float("nan"), float("nan")]
                     if hasattr(module, "blend_logits"):
                         blend = torch.softmax(module.blend_logits.detach().cpu(), dim=0).tolist()
-                    blend_rows.append({
-                        "model": model_name,
-                        "module": name,
-                        "stage": STAGE_MAP.get(name, name),
-                        "blend_base": blend[0],
-                        "blend_out": blend[1],
-                    })
+                    blend_rows.append(
+                        {
+                            "model": model_name,
+                            "module": name,
+                            "stage": STAGE_MAP.get(name, name),
+                            "blend_base": blend[0],
+                            "blend_out": blend[1],
+                        }
+                    )
             self.values = {}
             self.pixel_counts = {}
 
@@ -101,10 +103,14 @@ def make_validator(model_name, blend_rows, alpha_rows_holder):
                     a = a.mean(dim=1, keepdim=True)
                 stage = STAGE_MAP.get(name, name)
                 append_vals(self.values, stage, "all_pixels", a)
-                self.pixel_counts.setdefault(stage, {})["all_pixels"] = self.pixel_counts.setdefault(stage, {}).get("all_pixels", 0) + int(a.numel())
+                self.pixel_counts.setdefault(stage, {})["all_pixels"] = self.pixel_counts.setdefault(stage, {}).get(
+                    "all_pixels", 0
+                ) + int(a.numel())
                 for cat, mask_m in masks_m.items():
                     mask_a = F.interpolate(mask_m.float(), size=a.shape[-2:], mode="nearest") > 0.5
-                    self.pixel_counts.setdefault(stage, {})[cat] = self.pixel_counts.setdefault(stage, {}).get(cat, 0) + int(mask_a.sum().item())
+                    self.pixel_counts.setdefault(stage, {})[cat] = self.pixel_counts.setdefault(stage, {}).get(
+                        cat, 0
+                    ) + int(mask_a.sum().item())
                     append_vals(self.values, stage, cat, a, mask_a)
             super().update_metrics(preds, batch)
 
@@ -115,34 +121,38 @@ def make_validator(model_name, blend_rows, alpha_rows_holder):
                     chunks = self.values.get(stage, {}).get(cat, [])
                     count = self.pixel_counts.get(stage, {}).get(cat, 0)
                     if not chunks:
-                        rows.append({
-                            "model": model_name,
-                            "stage": stage,
-                            "category": cat,
-                            "n_alpha_pixels": count,
-                            "alpha_mean": "",
-                            "alpha_p25": "",
-                            "alpha_p50": "",
-                            "alpha_p75": "",
-                            "alpha_p95": "",
-                            "depth_weight_mean": "",
-                        })
+                        rows.append(
+                            {
+                                "model": model_name,
+                                "stage": stage,
+                                "category": cat,
+                                "n_alpha_pixels": count,
+                                "alpha_mean": "",
+                                "alpha_p25": "",
+                                "alpha_p50": "",
+                                "alpha_p75": "",
+                                "alpha_p95": "",
+                                "depth_weight_mean": "",
+                            }
+                        )
                         continue
                     vals = torch.cat(chunks)
                     q = torch.quantile(vals, torch.tensor([0.25, 0.5, 0.75, 0.95]))
                     mean = float(vals.mean())
-                    rows.append({
-                        "model": model_name,
-                        "stage": stage,
-                        "category": cat,
-                        "n_alpha_pixels": int(vals.numel()),
-                        "alpha_mean": mean,
-                        "alpha_p25": float(q[0]),
-                        "alpha_p50": float(q[1]),
-                        "alpha_p75": float(q[2]),
-                        "alpha_p95": float(q[3]),
-                        "depth_weight_mean": 1.0 - mean,
-                    })
+                    rows.append(
+                        {
+                            "model": model_name,
+                            "stage": stage,
+                            "category": cat,
+                            "n_alpha_pixels": int(vals.numel()),
+                            "alpha_mean": mean,
+                            "alpha_p25": float(q[0]),
+                            "alpha_p50": float(q[1]),
+                            "alpha_p75": float(q[2]),
+                            "alpha_p95": float(q[3]),
+                            "depth_weight_mean": 1.0 - mean,
+                        }
+                    )
             alpha_rows_holder.extend(rows)
             print("ALPHA_ROWS", model_name, json.dumps(rows, ensure_ascii=False, indent=2))
             super().finalize_metrics()
@@ -187,12 +197,15 @@ def main():
         )
         write_csv(OUT_ALPHA_CSV, alpha_rows)
         write_csv(OUT_BLEND_CSV, blend_rows)
-        OUT_JSON.write_text(json.dumps({"alpha": alpha_rows, "blend": blend_rows}, ensure_ascii=False, indent=2), encoding="utf-8")
+        OUT_JSON.write_text(
+            json.dumps({"alpha": alpha_rows, "blend": blend_rows}, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
 
     print("\nOUT_ALPHA_CSV", OUT_ALPHA_CSV)
     print("OUT_BLEND_CSV", OUT_BLEND_CSV)
     print("OUT_JSON", OUT_JSON)
     print("BLEND_ROWS", json.dumps(blend_rows, ensure_ascii=False, indent=2))
+
 
 if __name__ == "__main__":
     main()

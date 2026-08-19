@@ -524,48 +524,48 @@
         },
         {
           "base_stem": "622_xinjiang_IMG_0203_20260531050834352",
-          "src_alpha_delta_over_minus_normal": -5.185604095458984e-06,
-          "depth_delta_over_minus_normal": 5.161389708518982e-06,
+          "src_alpha_delta_over_minus_normal": -5.185604095458984e-6,
+          "depth_delta_over_minus_normal": 5.161389708518982e-6,
           "over088_delta": 0.05067057291666666,
           "normal_image": "622_xinjiang_IMG_0203_20260531050834352.jpg",
           "overexposed_image": "622_xinjiang_IMG_0203_20260531050834352_realexp.jpg"
         },
         {
           "base_stem": "622_xinjiang_IMG_0007_20260519031052562",
-          "src_alpha_delta_over_minus_normal": 1.811981201171875e-05,
-          "depth_delta_over_minus_normal": -1.80806964635849e-05,
+          "src_alpha_delta_over_minus_normal": 1.811981201171875e-5,
+          "depth_delta_over_minus_normal": -1.80806964635849e-5,
           "over088_delta": 0.015475260416666668,
           "normal_image": "622_xinjiang_IMG_0007_20260519031052562.jpg",
           "overexposed_image": "622_xinjiang_IMG_0007_20260519031052562_realexp.jpg"
         },
         {
           "base_stem": "622_xinjiang_IMG_0089_20260519033221869",
-          "src_alpha_delta_over_minus_normal": 7.587671279907227e-05,
-          "depth_delta_over_minus_normal": -7.572397589683533e-05,
+          "src_alpha_delta_over_minus_normal": 7.587671279907227e-5,
+          "depth_delta_over_minus_normal": -7.572397589683533e-5,
           "over088_delta": 0.006650390624999999,
           "normal_image": "622_xinjiang_IMG_0089_20260519033221869.jpg",
           "overexposed_image": "622_xinjiang_IMG_0089_20260519033221869_realexp.jpg"
         },
         {
           "base_stem": "622_xinjiang_IMG_0033_20260519034407035",
-          "src_alpha_delta_over_minus_normal": 8.809566497802734e-05,
-          "depth_delta_over_minus_normal": -8.817017078399658e-05,
+          "src_alpha_delta_over_minus_normal": 8.809566497802734e-5,
+          "depth_delta_over_minus_normal": -8.817017078399658e-5,
           "over088_delta": 0.00045247395833333294,
           "normal_image": "622_xinjiang_IMG_0033_20260519034407035.jpg",
           "overexposed_image": "622_xinjiang_IMG_0033_20260519034407035_realexp.jpg"
         },
         {
           "base_stem": "622_xinjiang_IMG_0116_20260602034041857",
-          "src_alpha_delta_over_minus_normal": 9.08970832824707e-05,
-          "depth_delta_over_minus_normal": -9.091757237911224e-05,
+          "src_alpha_delta_over_minus_normal": 9.08970832824707e-5,
+          "depth_delta_over_minus_normal": -9.091757237911224e-5,
           "over088_delta": 0.02569010416666667,
           "normal_image": "622_xinjiang_IMG_0116_20260602034041857.jpg",
           "overexposed_image": "622_xinjiang_IMG_0116_20260602034041857_realexp.jpg"
         },
         {
           "base_stem": "622_xinjiang_IMG_0049_20260519031144668",
-          "src_alpha_delta_over_minus_normal": 9.351968765258789e-05,
-          "depth_delta_over_minus_normal": -9.34898853302002e-05,
+          "src_alpha_delta_over_minus_normal": 9.351968765258789e-5,
+          "depth_delta_over_minus_normal": -9.34898853302002e-5,
           "over088_delta": 0.005107421875,
           "normal_image": "622_xinjiang_IMG_0049_20260519031144668.jpg",
           "overexposed_image": "622_xinjiang_IMG_0049_20260519031144668_realexp.jpg"
@@ -701,14 +701,14 @@
       "src_alpha_delta": {
         "mean": -0.0002588523544280635,
         "p10": -0.005391240119934082,
-        "p50": -5.513429641723633e-05,
+        "p50": -5.513429641723633e-5,
         "p90": 0.004797101020812988,
         "fraction_src_decreased_on_overexposure": 0.5060728744939271
       },
       "depth_delta": {
         "mean": 0.00025885247508523917,
         "p10": -0.004797041416168213,
-        "p50": 5.498528480529785e-05,
+        "p50": 5.498528480529785e-5,
         "p90": 0.005391210317611694,
         "fraction_depth_increased_on_overexposure": 0.5060728744939271
       },

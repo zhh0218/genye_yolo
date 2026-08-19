@@ -38,7 +38,7 @@ dataset/labels/train/xxx.txt
 ```bash
 cd /workspace/ultralytics-main_for_genye
 conda activate yolo26
-python - <<'PY'
+python - << 'PY'
 from ultralytics import YOLO
 
 model = YOLO("/workspace/ultralytics-main_for_genye/YOLOv11-RGB-D-coord_attv2-genye/coord_attv2-s8/weights/best.pt")
@@ -59,7 +59,7 @@ This is only for checking that the training pipeline works. Do not report these 
 ```bash
 cd /workspace/ultralytics-main_for_genye
 conda activate yolo26
-python - <<'PY'
+python - << 'PY'
 from ultralytics import YOLO
 
 model = YOLO("/workspace/ultralytics-main_for_genye/ultralytics/cfg/models/11/yolo11-seg.yaml")
