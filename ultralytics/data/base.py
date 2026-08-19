@@ -21,11 +21,10 @@ from ultralytics.utils.patches import imread
 
 
 class BaseDataset(Dataset):
-    """
-    Base dataset class for loading and processing image data.
+    """Base dataset class for loading and processing image data.
 
-    This class provides core functionality for loading images, caching, and preparing data for training and inference
-    in object detection tasks.
+    This class provides core functionality for loading images, caching, and preparing data for training and inference in
+    object detection tasks.
 
     Attributes:
         img_path (str): Path to the folder containing images.
@@ -86,8 +85,7 @@ class BaseDataset(Dataset):
         fraction: float = 1.0,
         channels: int = 3,
     ):
-        """
-        Initialize BaseDataset with given configuration and options.
+        """Initialize BaseDataset with given configuration and options.
 
         Args:
             img_path (str | list[str]): Path to the folder containing images or list of image paths.
@@ -115,7 +113,7 @@ class BaseDataset(Dataset):
         self.channels = channels
         self.cv2_flag = cv2.IMREAD_GRAYSCALE if channels == 1 else cv2.IMREAD_COLOR
         self.im_files = self.get_img_files(self.img_path)
-        #self.depth_files = self.get_depth_files(self.img_path)#叶灿庆
+        # self.depth_files = self.get_depth_files(self.img_path)#叶灿庆
         self.labels = self.get_labels()
         self.update_labels(include_class=classes)  # single_cls and include_class
         self.ni = len(self.labels)  # number of images
@@ -134,7 +132,7 @@ class BaseDataset(Dataset):
         # Cache images (options are cache = True, False, None, "ram", "disk")
         self.ims, self.im_hw0, self.im_hw = [None] * self.ni, [None] * self.ni, [None] * self.ni
         self.npy_files = [Path(f).with_suffix(".npy") for f in self.im_files]
-        #self.npy_depth_files = [Path(f).with_suffix(".npy") for f in self.depth_files]#叶灿庆
+        # self.npy_depth_files = [Path(f).with_suffix(".npy") for f in self.depth_files]#叶灿庆
         self.cache = cache.lower() if isinstance(cache, str) else "ram" if cache is True else None
         if self.cache == "ram" and self.check_cache_ram():
             if hyp.deterministic:
@@ -150,8 +148,7 @@ class BaseDataset(Dataset):
         self.transforms = self.build_transforms(hyp=hyp)
 
     def get_img_files(self, img_path: str | list[str]) -> list[str]:
-        """
-        Read image files from the specified path.
+        """Read image files from the specified path.
 
         Args:
             img_path (str | list[str]): Path or list of paths to image directories or files.
@@ -187,7 +184,7 @@ class BaseDataset(Dataset):
         check_file_speeds(im_files, prefix=self.prefix)  # check image read speeds
         return im_files
 
-    # 2025年 9月 11日 叶灿庆增加读取深度图片的方法 
+    # 2025年 9月 11日 叶灿庆增加读取深度图片的方法
     '''
     def get_depth_files(self, img_path: str | list[str]) -> list[str]:
         """
@@ -228,10 +225,9 @@ class BaseDataset(Dataset):
         check_file_speeds(im_files, prefix=self.prefix)  # check image read speeds
         return im_files
     '''
-    
+
     def update_labels(self, include_class: list[int] | None) -> None:
-        """
-        Update labels to include only specified classes.
+        """Update labels to include only specified classes.
 
         Args:
             include_class (list[int], optional): List of classes to include. If None, all classes are included.
@@ -253,10 +249,9 @@ class BaseDataset(Dataset):
             if self.single_cls:
                 self.labels[i]["cls"][:, 0] = 0
 
-    #加载图片的入口，我目前没有找到谁调用了他
+    # 加载图片的入口，我目前没有找到谁调用了他
     def load_image(self, i: int, rect_mode: bool = True) -> tuple[np.ndarray, tuple[int, int], tuple[int, int]]:
-        """
-        Load an image from dataset index 'i'.
+        """Load an image from dataset index 'i'.
 
         Args:
             i (int): Index of the image to load.
@@ -272,19 +267,19 @@ class BaseDataset(Dataset):
         """
         im, f, fn = self.ims[i], self.im_files[i], self.npy_files[i]
         # jpg
-        if self.im_files[i][-3:] == 'jpg' and self.npy_files[i]._cparts[-3] =='images' :
-            a = 1
-        
-        #png
-        if self.im_files[i][-3:] == 'png' and self.npy_files[i]._cparts[-3] =='depth' :
-            a = 1
-            
-        
-        if (self.im_files[i][-3:] == 'jpg' and self.npy_files[i]._cparts[-3] =='depth') or (self.im_files[i][-3:] == 'png' and self.npy_files[i]._cparts[-3] =='images'):
-            #print("错误！！！！！深度图片和彩色图片混用npy文件")
-            a = 1            
-            
-        
+        if self.im_files[i][-3:] == "jpg" and self.npy_files[i]._cparts[-3] == "images":
+            pass
+
+        # png
+        if self.im_files[i][-3:] == "png" and self.npy_files[i]._cparts[-3] == "depth":
+            pass
+
+        if (self.im_files[i][-3:] == "jpg" and self.npy_files[i]._cparts[-3] == "depth") or (
+            self.im_files[i][-3:] == "png" and self.npy_files[i]._cparts[-3] == "images"
+        ):
+            # print("错误！！！！！深度图片和彩色图片混用npy文件")
+            pass
+
         if im is None:  # not cached in RAM
             if fn.exists():  # load npy
                 try:
@@ -362,8 +357,7 @@ class BaseDataset(Dataset):
             np.save(f.as_posix(), imread(self.im_files[i]), allow_pickle=False)
 
     def check_cache_disk(self, safety_margin: float = 0.5) -> bool:
-        """
-        Check if there's enough disk space for caching images.
+        """Check if there's enough disk space for caching images.
 
         Args:
             safety_margin (float): Safety margin factor for disk space calculation.
@@ -386,7 +380,7 @@ class BaseDataset(Dataset):
                 LOGGER.warning(f"{self.prefix}Skipping caching images to disk, directory not writeable")
                 return False
         disk_required = b * self.ni / n * (1 + safety_margin)  # bytes required to cache dataset to disk
-        total, used, free = shutil.disk_usage(Path(self.im_files[0]).parent)
+        total, _used, free = shutil.disk_usage(Path(self.im_files[0]).parent)
         if disk_required > free:
             self.cache = None
             LOGGER.warning(
@@ -398,8 +392,7 @@ class BaseDataset(Dataset):
         return True
 
     def check_cache_ram(self, safety_margin: float = 0.5) -> bool:
-        """
-        Check if there's enough RAM for caching images.
+        """Check if there's enough RAM for caching images.
 
         Args:
             safety_margin (float): Safety margin factor for RAM calculation.
@@ -457,8 +450,7 @@ class BaseDataset(Dataset):
         return self.transforms(self.get_image_and_label(index))
 
     def get_image_and_label(self, index: int) -> dict[str, Any]:
-        """
-        Get and return label information from the dataset.
+        """Get and return label information from the dataset.
 
         Args:
             index (int): Index of the image to retrieve.
@@ -486,8 +478,7 @@ class BaseDataset(Dataset):
         return label
 
     def build_transforms(self, hyp: dict[str, Any] | None = None):
-        """
-        Users can customize augmentations here.
+        """Users can customize augmentations here.
 
         Examples:
             >>> if self.augment:
@@ -500,8 +491,7 @@ class BaseDataset(Dataset):
         raise NotImplementedError
 
     def get_labels(self) -> list[dict[str, Any]]:
-        """
-        Users can customize their own format here.
+        """Users can customize their own format here.
 
         Examples:
             Ensure output is a dictionary with the following keys:

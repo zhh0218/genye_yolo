@@ -12,7 +12,6 @@ import yaml
 
 from ultralytics import YOLO
 
-
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DATASET = ROOT / "Dataset" / "xinjiang_1500_baoguang"
 DEFAULT_MODEL_YAML = ROOT / "configs" / "yolo11-seg-spatialillum-learnblend-auxoff-xinjiang1500.yaml"
@@ -32,9 +31,13 @@ def parse_args() -> argparse.Namespace:
         description="Run RGB-D YOLO validation/inference and export spatial gate RGB/depth weights."
     )
     parser.add_argument("--dataset", type=Path, default=DEFAULT_DATASET, help="RGB-D dataset root.")
-    parser.add_argument("--model-yaml", type=Path, default=DEFAULT_MODEL_YAML, help="Model yaml with spatial gate enabled.")
+    parser.add_argument(
+        "--model-yaml", type=Path, default=DEFAULT_MODEL_YAML, help="Model yaml with spatial gate enabled."
+    )
     parser.add_argument("--weights", type=Path, default=DEFAULT_WEIGHTS, help="Checkpoint to load.")
-    parser.add_argument("--split", default="val_ab", help="Dataset split directory to inspect, e.g. val, val_expaug, val_ab.")
+    parser.add_argument(
+        "--split", default="val_ab", help="Dataset split directory to inspect, e.g. val, val_expaug, val_ab."
+    )
     parser.add_argument("--imgsz", type=int, default=640, help="Square inference size.")
     parser.add_argument("--device", default="0", help="CUDA device id or 'cpu'.")
     parser.add_argument("--max-images", type=int, default=50, help="Max images for gate statistics; 0 means all.")
@@ -91,7 +94,7 @@ def sample_group(image_path: Path) -> str:
 def letterbox(im: np.ndarray, size: int = 640, value: int = 114) -> np.ndarray:
     h, w = im.shape[:2]
     scale = min(size / h, size / w)
-    nh, nw = int(round(h * scale)), int(round(w * scale))
+    nh, nw = round(h * scale), round(w * scale)
     resized = cv2.resize(im, (nw, nh), interpolation=cv2.INTER_LINEAR)
     top = (size - nh) // 2
     bottom = size - nh - top
@@ -176,7 +179,9 @@ def main() -> None:
     data_yaml = write_windows_data_yaml(args.dataset, args.out)
     model = YOLO(str(args.model_yaml))
     model.load(str(args.weights))
-    device = torch.device("cpu" if args.device == "cpu" or not torch.cuda.is_available() else f"cuda:{args.device.split(',')[0]}")
+    device = torch.device(
+        "cpu" if args.device == "cpu" or not torch.cuda.is_available() else f"cuda:{args.device.split(',')[0]}"
+    )
     model.model.to(device)
 
     summary = {
@@ -237,7 +242,9 @@ def main() -> None:
     summary_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
 
     if not rows:
-        print("WARNING: no _last_alpha was captured. Check that the yaml and checkpoint really use modality_adaptive_gate.")
+        print(
+            "WARNING: no _last_alpha was captured. Check that the yaml and checkpoint really use modality_adaptive_gate."
+        )
     print(f"Saved gate weights: {csv_path}")
     print(f"Saved summary: {summary_path}")
 
