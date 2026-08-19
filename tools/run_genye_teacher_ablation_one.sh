@@ -6,7 +6,7 @@ cd "$ROOT"
 
 variant="${1:-}"
 if [[ -z "$variant" ]]; then
-  cat <<'USAGE'
+  cat << 'USAGE'
 Usage:
   bash tools/run_genye_teacher_ablation_one.sh <variant>
 
