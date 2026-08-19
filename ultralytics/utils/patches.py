@@ -8,16 +8,18 @@ from contextlib import contextmanager
 from copy import copy
 from pathlib import Path
 from typing import Any
-from PIL import Image
+
 import cv2
 import numpy as np
 import torch
+from PIL import Image
 
 # OpenCV Multilanguage-friendly functions ------------------------------------------------------------------------------
 _imshow = cv2.imshow  # copy to avoid recursion errors
 
+
 def apply_colormap_to_depth(depth_image):
-        
+
     # 2. 归一化深度图到0-255范围
     depth_min = np.min(depth_image)
     depth_max = np.max(depth_image)
@@ -26,12 +28,12 @@ def apply_colormap_to_depth(depth_image):
 
     # 3. 应用颜色映射（例如使用热力图）
     colormap = cv2.COLORMAP_JET  # 选择颜色映射，如热力图
-    depth_colormap = cv2.applyColorMap(depth_normalized, colormap)
+    cv2.applyColorMap(depth_normalized, colormap)
     return depth_normalized
 
+
 def imread(filename: str, flags: int = cv2.IMREAD_COLOR) -> np.ndarray | None:
-    """
-    Read an image from a file with multilanguage filename support.
+    """Read an image from a file with multilanguage filename support.
 
     Args:
         filename (str): Path to the file to read.
@@ -51,22 +53,22 @@ def imread(filename: str, flags: int = cv2.IMREAD_COLOR) -> np.ndarray | None:
             # Handle RGB images in tif/tiff format
             return frames[0] if len(frames) == 1 and frames[0].ndim == 3 else np.stack(frames, axis=2)
         return None
-    elif filename.endswith(("png")) and "depth" in filename:
+    elif filename.endswith("png") and "depth" in filename:
         im = Image.open(filename)  # 读取原生深度信息
-        im = np.array(im,dtype=np.float32)
-        '''num = 1775
+        im = np.array(im, dtype=np.float32)
+        """num = 1775
         im = np.where(im>num,num,im)
         im = np.where(im<1350,num,im)
-        im = num - im'''
+        im = num - im"""
         im = apply_colormap_to_depth(im)
         im = np.stack([im, im, im], axis=2)
-        #im.setflags(write=False)
-        #im_ = np.where(im==0, -1, im)
-        #im = np.where(im>1450,1450,im)
-        #im = np.where(im<900,1450,im)#此处1234代表传送带平面的深度值
-        #im = 1450  - im
-        #im = np.where(im_==-1, -50, im)
-        
+        # im.setflags(write=False)
+        # im_ = np.where(im==0, -1, im)
+        # im = np.where(im>1450,1450,im)
+        # im = np.where(im<900,1450,im)#此处1234代表传送带平面的深度值
+        # im = 1450  - im
+        # im = np.where(im_==-1, -50, im)
+
         return im[..., None] if im is not None and im.ndim == 2 else im  # Always ensure 3 dimensions
     else:
         im = cv2.imdecode(file_bytes, flags)
@@ -74,8 +76,7 @@ def imread(filename: str, flags: int = cv2.IMREAD_COLOR) -> np.ndarray | None:
 
 
 def imwrite(filename: str, img: np.ndarray, params: list[int] | None = None) -> bool:
-    """
-    Write an image to a file with multilanguage filename support.
+    """Write an image to a file with multilanguage filename support.
 
     Args:
         filename (str): Path to the file to write.
@@ -100,15 +101,14 @@ def imwrite(filename: str, img: np.ndarray, params: list[int] | None = None) -> 
 
 
 def imshow(winname: str, mat: np.ndarray) -> None:
-    """
-    Display an image in the specified window with multilanguage window name support.
+    """Display an image in the specified window with multilanguage window name support.
 
     This function is a wrapper around OpenCV's imshow function that displays an image in a named window. It handles
     multilanguage window names by encoding them properly for OpenCV compatibility.
 
     Args:
-        winname (str): Name of the window where the image will be displayed. If a window with this name already
-            exists, the image will be displayed in that window.
+        winname (str): Name of the window where the image will be displayed. If a window with this name already exists,
+            the image will be displayed in that window.
         mat (np.ndarray): Image to be shown. Should be a valid numpy array representing an image.
 
     Examples:
@@ -125,8 +125,7 @@ _torch_save = torch.save
 
 
 def torch_load(*args, **kwargs):
-    """
-    Load a PyTorch model with updated arguments to avoid warnings.
+    """Load a PyTorch model with updated arguments to avoid warnings.
 
     This function wraps torch.load and adds the 'weights_only' argument for PyTorch 1.13.0+ to prevent warnings.
 
@@ -150,11 +149,10 @@ def torch_load(*args, **kwargs):
 
 
 def torch_save(*args, **kwargs):
-    """
-    Save PyTorch objects with retry mechanism for robustness.
+    """Save PyTorch objects with retry mechanism for robustness.
 
-    This function wraps torch.save with 3 retries and exponential backoff in case of save failures, which can occur
-    due to device flushing delays or antivirus scanning.
+    This function wraps torch.save with 3 retries and exponential backoff in case of save failures, which can occur due
+    to device flushing delays or antivirus scanning.
 
     Args:
         *args (Any): Positional arguments to pass to torch.save.
@@ -167,16 +165,15 @@ def torch_save(*args, **kwargs):
     for i in range(4):  # 3 retries
         try:
             return _torch_save(*args, **kwargs)
-        except RuntimeError as e:  # Unable to save, possibly waiting for device to flush or antivirus scan
+        except RuntimeError:  # Unable to save, possibly waiting for device to flush or antivirus scan
             if i == 3:
-                raise e
+                raise
             time.sleep((2**i) / 2)  # Exponential backoff: 0.5s, 1.0s, 2.0s
 
 
 @contextmanager
 def arange_patch(args):
-    """
-    Workaround for ONNX torch.arange incompatibility with FP16.
+    """Workaround for ONNX torch.arange incompatibility with FP16.
 
     https://github.com/pytorch/pytorch/issues/148041.
     """
@@ -196,8 +193,7 @@ def arange_patch(args):
 
 @contextmanager
 def override_configs(args, overrides: dict[str, Any] | None = None):
-    """
-    Context manager to temporarily override configurations in args.
+    """Context manager to temporarily override configurations in args.
 
     Args:
         args (IterableSimpleNamespace): Original configuration arguments.
