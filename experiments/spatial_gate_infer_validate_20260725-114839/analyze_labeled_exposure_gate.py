@@ -13,7 +13,6 @@ import torch
 
 from ultralytics import YOLO
 
-
 ROOT = Path(__file__).resolve().parents[2]
 EXP_DIR = Path(__file__).resolve().parent
 DEFAULT_DATASET = ROOT / "Dataset" / "xinjiang_1500_baoguang"
@@ -92,7 +91,7 @@ def read_label_masks(label_path: Path, width: int, height: int) -> list[np.ndarr
 def letterbox(im: np.ndarray, size: int, interpolation: int, pad_value: int | tuple[int, int, int]) -> np.ndarray:
     height, width = im.shape[:2]
     scale = min(size / height, size / width)
-    new_height, new_width = int(round(height * scale)), int(round(width * scale))
+    new_height, new_width = round(height * scale), round(width * scale)
     resized = cv2.resize(im, (new_width, new_height), interpolation=interpolation)
     top = (size - new_height) // 2
     bottom = size - new_height - top
@@ -140,7 +139,9 @@ def weighted_mean(values: np.ndarray, weights: np.ndarray) -> float:
     return float((values * weights).sum() / weight_sum) if weight_sum > 1e-8 else float("nan")
 
 
-def region_means(alpha: np.ndarray, selected_mask: np.ndarray, control_mask: np.ndarray, package_mask: np.ndarray) -> dict[str, float]:
+def region_means(
+    alpha: np.ndarray, selected_mask: np.ndarray, control_mask: np.ndarray, package_mask: np.ndarray
+) -> dict[str, float]:
     height, width = alpha.shape
     selected = cv2.resize(selected_mask.astype(np.float32), (width, height), interpolation=cv2.INTER_AREA)
     control = cv2.resize(control_mask.astype(np.float32), (width, height), interpolation=cv2.INTER_AREA)
@@ -217,7 +218,9 @@ def main() -> None:
         masks = read_label_masks(label_path, original.shape[1], original.shape[0])
         selected_indices = selected_by_stem[stem]
         if max(selected_indices) >= len(masks):
-            raise RuntimeError(f"Manifest instance index exceeds labels for {stem}: {selected_indices}, labels={len(masks)}")
+            raise RuntimeError(
+                f"Manifest instance index exceeds labels for {stem}: {selected_indices}, labels={len(masks)}"
+            )
 
         selected_mask = np.zeros(original.shape[:2], dtype=np.uint8)
         control_mask = np.zeros_like(selected_mask)
@@ -298,9 +301,7 @@ def main() -> None:
         "exposed_selected_minus_background_src",
     ]
     for module, module_rows in grouped.items():
-        summary["modules"][module] = {
-            metric: stats([float(row[metric]) for row in module_rows]) for metric in metrics
-        }
+        summary["modules"][module] = {metric: stats([float(row[metric]) for row in module_rows]) for metric in metrics}
 
     summary_path = args.out / "labeled_exposure_gate_summary.json"
     summary_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
