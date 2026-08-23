@@ -254,6 +254,13 @@ class v8DetectionLoss:
         self.rgbd_depth_aux_exp_weight = float(
             getattr(h, "rgbd_depth_aux_exp_weight", y.get("rgbd_depth_aux_exp_weight", 2.0)) or 0.0
         )
+        self.rgbd_pmg_aux_loss = _bool_value(getattr(h, "rgbd_pmg_aux_loss", y.get("rgbd_pmg_aux_loss", False)))
+        self.rgbd_pmg_aux_loss_weight = float(
+            getattr(h, "rgbd_pmg_aux_loss_weight", y.get("rgbd_pmg_aux_loss_weight", 0.2)) or 0.0
+        )
+        self.rgbd_pmg_aux_pos_weight = float(
+            getattr(h, "rgbd_pmg_aux_pos_weight", y.get("rgbd_pmg_aux_pos_weight", 1.0)) or 1.0
+        )
         self.rgbd_exp_brightness_thr = float(
             getattr(h, "rgbd_exp_brightness_thr", y.get("rgbd_exp_brightness_thr", 0.88)) or 0.88
         )
@@ -405,7 +412,10 @@ class v8SegmentationLoss(v8DetectionLoss):
                     obj[i, 0] = selected.gt(0).float().amax(dim=0)
 
         if obj.shape[-2:] != size:
-            obj = F.interpolate(obj, size=size, mode="nearest")
+            if size[0] <= obj.shape[-2] and size[1] <= obj.shape[-1]:
+                obj = F.adaptive_max_pool2d(obj, output_size=size)
+            else:
+                obj = F.interpolate(obj, size=size, mode="nearest")
         return obj.clamp_(0, 1)
 
     def _rgb_exposure_prior(self, img: torch.Tensor, size: tuple[int, int]) -> torch.Tensor:
@@ -460,14 +470,32 @@ class v8SegmentationLoss(v8DetectionLoss):
         loss = F.binary_cross_entropy_with_logits(logits, target, reduction="none")
         return (loss * weight).mean() * self.rgbd_depth_aux_loss_weight
 
+    def _rgbd_pmg_auxiliary_loss(self, batch: dict[str, torch.Tensor]) -> torch.Tensor:
+        """Supervise COF PMG logits with category-agnostic foreground masks."""
+        pmg_logits = getattr(self.model, "_last_pmg_logits", None)
+        if not (self.rgbd_pmg_aux_loss and self.rgbd_pmg_aux_loss_weight > 0 and pmg_logits):
+            return torch.zeros((), device=self.device)
+
+        losses = []
+        pos_gain = max(self.rgbd_pmg_aux_pos_weight - 1.0, 0.0)
+        for _, logits in pmg_logits:
+            logits = logits.float()
+            target = self._object_union_mask(batch, logits.shape[-2:]).to(dtype=logits.dtype)
+            weight = 1.0 + target * pos_gain
+            loss = F.binary_cross_entropy_with_logits(logits, target, reduction="none")
+            losses.append((loss * weight).mean())
+        return torch.stack(losses).mean() * self.rgbd_pmg_aux_loss_weight
+
     def _rgbd_auxiliary_loss(self, batch: dict[str, torch.Tensor]) -> torch.Tensor:
-        """Combine RGB-D gate supervision and depth foreground auxiliary losses."""
+        """Combine RGB-D gate, depth foreground, and COF PMG auxiliary losses."""
         gate_loss = self._rgbd_gate_supervision_loss(batch)
         depth_loss = self._rgbd_depth_auxiliary_loss(batch)
-        aux_loss = gate_loss + depth_loss
+        pmg_loss = self._rgbd_pmg_auxiliary_loss(batch)
+        aux_loss = gate_loss + depth_loss + pmg_loss
         self.last_rgbd_aux_losses = {
             "gate": float(gate_loss.detach()) if gate_loss.numel() else 0.0,
             "depth": float(depth_loss.detach()) if depth_loss.numel() else 0.0,
+            "pmg": float(pmg_loss.detach()) if pmg_loss.numel() else 0.0,
         }
         return aux_loss
 

@@ -216,6 +216,7 @@ class BaseModel(torch.nn.Module):
         if self.training:
             self._last_depth_aux_logits = None
             self._last_rgbd_gate_alphas = []
+            self._last_pmg_logits = []
 
         # ── Phase 1: run both backbones, store depth P3/P4/P5 ──────────────
         # Run depth backbone independently first, storing all stage outputs
@@ -265,6 +266,10 @@ class BaseModel(torch.nn.Module):
                 rgb_feat, depth_feat = gate_module(rgb_feat, depth_feat)
             fusion_module = self.model[self._fusion_indices[fi]]
             y[key] = fusion_module(rgb_feat, depth_feat)
+            if collect_rgbd_aux and getattr(self, "rgbd_pmg_aux_loss", False):
+                pmg_logits = getattr(fusion_module, "_last_pmg_logits", None)
+                if pmg_logits is not None:
+                    self._last_pmg_logits.append((key, pmg_logits))
             if collect_rgbd_aux and getattr(self, "rgbd_gate_loss", False):
                 alpha = self._last_fusion_alpha(fusion_module)
                 if alpha is not None:
@@ -527,6 +532,7 @@ class DetectionModel(BaseModel):
         self.rgbd_aux_loss = bool(self.yaml.get("rgbd_aux_loss", False))
         self.rgbd_gate_loss = self.rgbd_aux_loss and bool(self.yaml.get("rgbd_gate_loss", True))
         self.rgbd_depth_aux_loss = self.rgbd_aux_loss and bool(self.yaml.get("rgbd_depth_aux_loss", True))
+        self.rgbd_pmg_aux_loss = bool(self.yaml.get("rgbd_pmg_aux_loss", False))
 
         # Depth backbone layer mapping — derived from YAML structure, not hardcoded
         _n_backbone = len(self.yaml.get("backbone", []))
@@ -2016,6 +2022,133 @@ class RGBDDepthAuxHead(nn.Module):
         return self.head(x)
 
 
+class RGBDCOFPseudoMaskGenerator(nn.Module):
+    """COF-style pseudo-mask generator for one RGB-D feature scale."""
+
+    def __init__(self, c_in, alpha_init=0.5):
+        super().__init__()
+        alpha_init = min(max(float(alpha_init), 1e-4), 1.0 - 1e-4)
+        self.alpha_logit = nn.Parameter(torch.logit(torch.tensor(alpha_init)))
+        hidden = max(c_in // 4, 16)
+        self.compress = nn.Sequential(
+            nn.Conv2d(c_in, hidden, kernel_size=1, stride=1, padding=0, bias=False),
+            nn.BatchNorm2d(hidden),
+            nn.ReLU(inplace=True),
+        )
+        self.spatial = nn.Sequential(
+            nn.Conv2d(hidden, hidden, kernel_size=3, stride=1, padding=1, groups=hidden, bias=False),
+            nn.BatchNorm2d(hidden),
+            nn.ReLU(inplace=True),
+        )
+        self.to_sam = nn.Conv2d(hidden, 2, kernel_size=1, stride=1, padding=0)
+        self.sam = nn.Sequential(
+            nn.Conv2d(2, 1, kernel_size=7, stride=1, padding=9, dilation=3, bias=False),
+            nn.BatchNorm2d(1),
+        )
+
+    def forward(self, rgb, depth):
+        alpha = torch.sigmoid(self.alpha_logit).to(dtype=rgb.dtype, device=rgb.device)
+        x = alpha * rgb + (1.0 - alpha) * depth
+        return self.sam(self.to_sam(self.spatial(self.compress(x))))
+
+
+class _COFDepthwiseSeparableProj(nn.Module):
+    """Independent DSConv 3x3 projection used for Q/K/V in MGBCF."""
+
+    def __init__(self, channels):
+        super().__init__()
+        self.proj = nn.Sequential(
+            nn.Conv2d(channels, channels, kernel_size=3, stride=1, padding=1, groups=channels, bias=False),
+            nn.BatchNorm2d(channels),
+            nn.SiLU(inplace=True),
+            nn.Conv2d(channels, channels, kernel_size=1, stride=1, padding=0, bias=False),
+        )
+
+    def forward(self, x):
+        return self.proj(x)
+
+
+class RGBDCOFMaskGuidedBiCrossFusion(nn.Module):
+    """
+    COF-style PMG + MGBCF fusion.
+
+    PMG predicts a pseudo foreground mask from RGB and depth features. MGBCF uses
+    that predicted mask to guide only the full-resolution query tensors, then
+    performs bidirectional RGB<->depth cross attention and a residual FFN fusion.
+    """
+
+    def __init__(self, c_in, num_heads=8, kv_pool=1, embed_ratio=0.5, min_embed=64, pmg_alpha_init=0.5, **kwargs):
+        super().__init__()
+        embed = max(int(c_in * float(embed_ratio)), int(min_embed))
+        embed = min(embed, c_in)
+        num_heads = max(1, min(int(num_heads), embed))
+        while embed % num_heads != 0 and num_heads > 1:
+            num_heads -= 1
+        self.num_heads = num_heads
+        self.head_dim = embed // num_heads
+        self.scale = self.head_dim ** -0.5
+        self.kv_pool = int(kv_pool) if int(kv_pool) > 1 else 1
+
+        self.pmg = RGBDCOFPseudoMaskGenerator(c_in, alpha_init=pmg_alpha_init)
+        self.rgb_embed = Conv(c_in, embed, 1, 1)
+        self.depth_embed = Conv(c_in, embed, 1, 1)
+
+        self.q_rgb = _COFDepthwiseSeparableProj(embed)
+        self.k_rgb = _COFDepthwiseSeparableProj(embed)
+        self.v_rgb = _COFDepthwiseSeparableProj(embed)
+        self.q_depth = _COFDepthwiseSeparableProj(embed)
+        self.k_depth = _COFDepthwiseSeparableProj(embed)
+        self.v_depth = _COFDepthwiseSeparableProj(embed)
+
+        self.out_rgb = nn.Conv2d(embed, embed, kernel_size=1, stride=1, padding=0, bias=False)
+        self.out_depth = nn.Conv2d(embed, embed, kernel_size=1, stride=1, padding=0, bias=False)
+        self.norm = nn.GroupNorm(1, embed * 2)
+        self.ffn = nn.Sequential(
+            nn.Conv2d(embed * 2, embed * 2, kernel_size=1, stride=1, padding=0, bias=False),
+            nn.Conv2d(embed * 2, embed * 2, kernel_size=3, stride=1, padding=1, groups=embed * 2, bias=False),
+            nn.GELU(),
+            nn.Conv2d(embed * 2, c_in, kernel_size=1, stride=1, padding=0, bias=False),
+        )
+        self.shortcut = nn.Conv2d(embed * 2, c_in, kernel_size=1, stride=1, padding=0, bias=False)
+        self._last_pmg_logits = None
+
+    def _pool_kv(self, x):
+        if self.kv_pool <= 1:
+            return x
+        return F.avg_pool2d(x, kernel_size=self.kv_pool, stride=self.kv_pool, ceil_mode=True)
+
+    def _tokens(self, x):
+        b, c, h, w = x.shape
+        return x.reshape(b, self.num_heads, self.head_dim, h * w).permute(0, 1, 3, 2).contiguous()
+
+    def _cross_attention(self, q, k, v, out_proj):
+        b, _, h, w = q.shape
+        q_tokens = self._tokens(q)
+        k_tokens = self._tokens(k)
+        v_tokens = self._tokens(v)
+        attn = (q_tokens.float() @ k_tokens.float().transpose(-2, -1)) * self.scale
+        out = (attn.softmax(dim=-1) @ v_tokens.float()).to(dtype=q.dtype)
+        out = out.permute(0, 1, 3, 2).reshape(b, -1, h, w).contiguous()
+        return out_proj(out)
+
+    def forward(self, rgb, depth):
+        logits = self.pmg(rgb, depth)
+        guide = torch.sigmoid(logits).to(dtype=rgb.dtype)
+        self._last_pmg_logits = logits if self.training and torch.is_grad_enabled() else None
+
+        rgb_e = self.rgb_embed(rgb)
+        depth_e = self.depth_embed(depth)
+        q_rgb = self.q_rgb(rgb_e) * (1.0 + guide)
+        q_depth = self.q_depth(depth_e) * (1.0 + guide)
+        k_rgb, v_rgb = self._pool_kv(self.k_rgb(rgb_e)), self._pool_kv(self.v_rgb(rgb_e))
+        k_depth, v_depth = self._pool_kv(self.k_depth(depth_e)), self._pool_kv(self.v_depth(depth_e))
+
+        u_depth = self._cross_attention(q_depth, k_rgb, v_rgb, self.out_depth)
+        u_rgb = self._cross_attention(q_rgb, k_depth, v_depth, self.out_rgb)
+        fused_tokens = torch.cat((u_rgb, u_depth), dim=1)
+        return self.ffn(self.norm(fused_tokens)) + self.shortcut(fused_tokens)
+
+
 class RGBDRelativeReliabilityGate(nn.Module):
     """Identity-initialized soft gate for relative RGB/depth feature reliability."""
 
@@ -2922,6 +3055,7 @@ def parse_model(d, ch, verbose=True):
     # 'add'       — simple element-wise addition baseline
     # 'old_cmx_ffm' — old YOLOv5 FRM + FFM fusion port
     # 'cmm'       — MambaSOD CMM: self-enhance + joint gate (~1.2M, bidirectional)
+    # 'cof_mgbcf' — COF-style PMG + mask-guided bidirectional cross-modal fusion
     _RGBD_FUSION_CLS = {
         'se':            RGBDCrossAttention,
         'mamba':         RGBDMambaFusion,
@@ -2934,6 +3068,9 @@ def parse_model(d, ch, verbose=True):
         'old_cmx_ffm':   RGBDYOLOv5FRMFFMFusion,
         'yolov5_frm_ffm': RGBDYOLOv5FRMFFMFusion,
         'cmm':           RGBDCrossModalMamba,
+        'cof':           RGBDCOFMaskGuidedBiCrossFusion,
+        'mgbcf':         RGBDCOFMaskGuidedBiCrossFusion,
+        'cof_mgbcf':     RGBDCOFMaskGuidedBiCrossFusion,
     }
     _fusion_key = d.get('rgbd_fusion', 'se')
     _fusion_cls = _RGBD_FUSION_CLS.get(_fusion_key, RGBDCrossAttention)
@@ -2956,6 +3093,12 @@ def parse_model(d, ch, verbose=True):
     if bool(d.get('fusion_learnable_blend', False)):
         _fusion_kw['learnable_blend'] = True
         _fusion_kw['blend_init'] = float(d.get('fusion_blend_init', 0.5))
+    if 'cof_embed_ratio' in d:
+        _fusion_kw['embed_ratio'] = float(d.get('cof_embed_ratio'))
+    if 'cof_min_embed' in d:
+        _fusion_kw['min_embed'] = int(d.get('cof_min_embed'))
+    if 'cof_pmg_alpha_init' in d:
+        _fusion_kw['pmg_alpha_init'] = float(d.get('cof_pmg_alpha_init'))
     if verbose:
         LOGGER.info(f"RGB-D fusion mode: '{_fusion_key}' → {_fusion_cls.__name__}"
                      + (f" (modality adaptive gate)" if _adaptive_gate else ""))
@@ -2978,9 +3121,11 @@ def parse_model(d, ch, verbose=True):
         _p3_module = RGBDWaveletHFFusion(ch_p3, num_heads=8, kv_pool=10, base_fusion_cls=_fusion_cls, **_fusion_kw)
     else:
         _p3_fusion_cls = _wavelet_guided_cls if _p3_wavelet_guided and _wavelet_guided_cls else _fusion_cls
-        _p3_module = _p3_fusion_cls(ch_p3, num_heads=8, kv_pool=10, **_fusion_kw)
-    _p4_module = _p4_fusion_cls(ch_p4, num_heads=8, kv_pool=10, **_fusion_kw)
-    _p5_module = _fusion_cls(ch_p5, num_heads=8, kv_pool=10, **_fusion_kw)
+        _p3_kv_pool = 2 if _fusion_cls is RGBDCOFMaskGuidedBiCrossFusion else 10
+        _p3_module = _p3_fusion_cls(ch_p3, num_heads=8, kv_pool=_p3_kv_pool, **_fusion_kw)
+    _p45_kv_pool = 1 if _fusion_cls is RGBDCOFMaskGuidedBiCrossFusion else 10
+    _p4_module = _p4_fusion_cls(ch_p4, num_heads=8, kv_pool=_p45_kv_pool, **_fusion_kw)
+    _p5_module = _fusion_cls(ch_p5, num_heads=8, kv_pool=_p45_kv_pool, **_fusion_kw)
     layers.append(_p3_module)  # P3 fusion (80x80)
     layers.append(_p4_module)  # P4 fusion (40x40)
     layers.append(_p5_module)  # P5 fusion (20x20)

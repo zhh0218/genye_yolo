@@ -95,8 +95,18 @@ def build_runtime_model_yaml(base_path, run_name):
         'P4_WAVELET_GUIDED': 'p4_wavelet_guided',
         'DEPTH_FPN': 'depth_fpn',
         'MODALITY_ADAPTIVE_GATE': 'modality_adaptive_gate',
+        'RGBD_PMG_AUX_LOSS': 'rgbd_pmg_aux_loss',
         'PROG_LOSS': 'prog_loss',
         'STAL': 'stal',
+    }
+    float_overrides = {
+        'RGBD_PMG_AUX_LOSS_WEIGHT': 'rgbd_pmg_aux_loss_weight',
+        'RGBD_PMG_AUX_POS_WEIGHT': 'rgbd_pmg_aux_pos_weight',
+        'COF_EMBED_RATIO': 'cof_embed_ratio',
+        'COF_PMG_ALPHA_INIT': 'cof_pmg_alpha_init',
+    }
+    int_overrides = {
+        'COF_MIN_EMBED': 'cof_min_embed',
     }
 
     runtime_overrides = {}
@@ -108,6 +118,14 @@ def build_runtime_model_yaml(base_path, run_name):
         value = _env_flag(env_name)
         if value is not None:
             runtime_overrides[yaml_key] = value
+    for env_name, yaml_key in float_overrides.items():
+        value = os.getenv(env_name, '').strip()
+        if value:
+            runtime_overrides[yaml_key] = float(value)
+    for env_name, yaml_key in int_overrides.items():
+        value = os.getenv(env_name, '').strip()
+        if value:
+            runtime_overrides[yaml_key] = int(value)
 
     if not runtime_overrides:
         return base_path

@@ -40,6 +40,9 @@ multi_scale: False # (bool) Whether to use multiscale during training
 # Segmentation
 overlap_mask: True # (bool) merge object masks into a single image mask during training (segment train only)
 mask_ratio: 4 # (int) mask downsample ratio (segment train only)
+rgbd_pmg_aux_loss: False # (bool) supervise COF PMG pseudo-mask logits during segment training
+rgbd_pmg_aux_loss_weight: 0.2 # (float) weight for COF PMG auxiliary foreground-mask BCE loss
+rgbd_pmg_aux_pos_weight: 1.0 # (float) positive-pixel weight for COF PMG auxiliary loss
 # Classification
 dropout: 0.0 # (float) use dropout regularization (classify train only)
 
